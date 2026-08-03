@@ -1,0 +1,1863 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Running Coach</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #090b10;
+        --surface: #131821;
+        --surface-2: #1b2330;
+        --line: #2c3747;
+        --text: #f4f7fb;
+        --muted: #9aa7b6;
+        --orange: #ff6b35;
+        --cyan: #38d5ff;
+        --green: #46d981;
+        --red: #ff5a67;
+        --yellow: #f2c94c;
+        --shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        background: var(--bg);
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        background:
+          radial-gradient(circle at top left, rgba(255, 107, 53, 0.18), transparent 32rem),
+          linear-gradient(145deg, #090b10 0%, #111722 48%, #08090d 100%);
+        color: var(--text);
+      }
+
+      button,
+      input,
+      textarea,
+      select {
+        font: inherit;
+      }
+
+      button {
+        border: 0;
+        cursor: pointer;
+      }
+
+      button:disabled {
+        cursor: not-allowed;
+        opacity: 0.45;
+      }
+
+      .app {
+        width: min(100%, 520px);
+        min-height: 100vh;
+        margin: 0 auto;
+        padding: max(18px, env(safe-area-inset-top)) 16px max(88px, env(safe-area-inset-bottom));
+      }
+
+      .topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        margin-bottom: 18px;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .mark {
+        width: 44px;
+        height: 44px;
+        display: grid;
+        place-items: center;
+        border-radius: 8px;
+        background: linear-gradient(135deg, var(--orange), #ffb703);
+        box-shadow: var(--shadow);
+      }
+
+      .mark svg {
+        width: 27px;
+        height: 27px;
+        color: #111;
+      }
+
+      h1,
+      h2,
+      h3,
+      p {
+        margin: 0;
+      }
+
+      h1 {
+        font-size: 20px;
+        line-height: 1.1;
+      }
+
+      .date {
+        margin-top: 4px;
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .section {
+        display: none;
+      }
+
+      .section.active {
+        display: block;
+        animation: fade 160ms ease-out;
+      }
+
+      @keyframes fade {
+        from {
+          opacity: 0;
+          transform: translateY(6px);
+        }
+
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .hero {
+        min-height: 172px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        gap: 22px;
+        padding: 22px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 8px;
+        background:
+          linear-gradient(135deg, rgba(255, 107, 53, 0.86), rgba(20, 27, 38, 0.74)),
+          url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='520' height='240' viewBox='0 0 520 240'%3E%3Cg fill='none' stroke='rgba(255,255,255,.28)' stroke-width='3'%3E%3Cpath d='M25 190c42-44 88-56 139-36 50 19 91 13 123-18 39-38 91-42 156-12'/%3E%3Cpath d='M28 208c51-28 94-31 128-11 45 26 87 23 128-10 40-32 87-36 142-10' opacity='.65'/%3E%3C/g%3E%3Ccircle cx='405' cy='58' r='24' fill='rgba(255,255,255,.24)'/%3E%3C/svg%3E");
+        background-size: cover;
+        box-shadow: var(--shadow);
+      }
+
+      .hero h2 {
+        max-width: 340px;
+        font-size: 34px;
+        line-height: 0.96;
+        letter-spacing: 0;
+      }
+
+      .hero p {
+        color: rgba(255, 255, 255, 0.82);
+        font-size: 15px;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+        margin: 14px 0;
+      }
+
+      .metric,
+      .card,
+      .panel {
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 8px;
+        background: rgba(19, 24, 33, 0.94);
+      }
+
+      .metric {
+        min-height: 92px;
+        padding: 14px;
+      }
+
+      .label {
+        color: var(--muted);
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+      }
+
+      .value {
+        margin-top: 8px;
+        font-size: 28px;
+        font-weight: 800;
+      }
+
+      .panel {
+        padding: 16px;
+        margin-top: 14px;
+      }
+
+      .panel-title {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 12px;
+      }
+
+      .panel-title h2 {
+        font-size: 18px;
+      }
+
+      .muted {
+        color: var(--muted);
+      }
+
+      .stack {
+        display: grid;
+        gap: 10px;
+      }
+
+      .card {
+        width: 100%;
+        padding: 14px;
+        color: var(--text);
+        text-align: left;
+      }
+
+      .card-row,
+      .form-row,
+      .actions {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+      }
+
+      .card h3 {
+        font-size: 16px;
+      }
+
+      .pill {
+        flex: 0 0 auto;
+        padding: 5px 9px;
+        border-radius: 999px;
+        background: var(--surface-2);
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .pill.done {
+        background: rgba(70, 217, 129, 0.16);
+        color: var(--green);
+      }
+
+      .pill.current {
+        background: rgba(56, 213, 255, 0.16);
+        color: var(--cyan);
+      }
+
+      .progress {
+        width: 100%;
+        height: 9px;
+        overflow: hidden;
+        border-radius: 999px;
+        background: #283240;
+      }
+
+      .bar {
+        width: 0%;
+        height: 100%;
+        border-radius: inherit;
+        background: linear-gradient(90deg, var(--orange), var(--cyan));
+        transition: width 180ms ease;
+      }
+
+      .primary,
+      .secondary,
+      .danger {
+        min-height: 48px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        border-radius: 8px;
+        padding: 0 16px;
+        font-weight: 800;
+        color: #091018;
+      }
+
+      .primary {
+        background: var(--orange);
+      }
+
+      .secondary {
+        background: var(--surface-2);
+        color: var(--text);
+        border: 1px solid var(--line);
+      }
+
+      .danger {
+        background: rgba(255, 90, 103, 0.18);
+        color: var(--red);
+        border: 1px solid rgba(255, 90, 103, 0.35);
+      }
+
+      .wide {
+        width: 100%;
+      }
+
+      .tabs {
+        position: fixed;
+        left: 50%;
+        bottom: 0;
+        z-index: 10;
+        width: min(100%, 520px);
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 4px;
+        transform: translateX(-50%);
+        padding: 8px 10px max(8px, env(safe-area-inset-bottom));
+        border-top: 1px solid rgba(255, 255, 255, 0.08);
+        background: rgba(9, 11, 16, 0.94);
+        backdrop-filter: blur(18px);
+      }
+
+      .tab {
+        min-height: 54px;
+        display: grid;
+        place-items: center;
+        gap: 3px;
+        border-radius: 8px;
+        background: transparent;
+        color: var(--muted);
+        font-size: 11px;
+      }
+
+      .tab svg,
+      .icon {
+        width: 20px;
+        height: 20px;
+      }
+
+      .tab.active {
+        background: var(--surface-2);
+        color: var(--text);
+      }
+
+      .workout-stage {
+        min-height: 360px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        gap: 18px;
+      }
+
+      .timer {
+        font-size: clamp(56px, 18vw, 92px);
+        font-weight: 900;
+        line-height: 0.95;
+        letter-spacing: 0;
+      }
+
+      .stage-name {
+        font-size: 30px;
+        font-weight: 900;
+      }
+
+      .runner-info {
+        padding: 12px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: rgba(27, 35, 48, 0.7);
+      }
+
+      .runner-info strong {
+        display: block;
+        margin-top: 4px;
+        font-size: 17px;
+      }
+
+      .sequence-list {
+        display: grid;
+        gap: 0;
+        margin-top: 10px;
+      }
+
+      .sequence-step {
+        position: relative;
+        display: grid;
+        grid-template-columns: 28px 1fr;
+        gap: 10px;
+        padding: 0 0 12px;
+        color: var(--muted);
+      }
+
+      .sequence-step:last-child {
+        padding-bottom: 0;
+      }
+
+      .sequence-step::before {
+        content: "";
+        position: absolute;
+        top: 22px;
+        bottom: -2px;
+        left: 10px;
+        width: 2px;
+        background: var(--line);
+      }
+
+      .sequence-step:last-child::before {
+        display: none;
+      }
+
+      .sequence-step.active {
+        color: var(--text);
+      }
+
+      .sequence-step span {
+        position: relative;
+        z-index: 1;
+        width: 22px;
+        height: 22px;
+        display: grid;
+        place-items: center;
+        border: 2px solid var(--line);
+        border-radius: 999px;
+        background: #0d1118;
+        color: var(--muted);
+        font-size: 11px;
+        font-weight: 900;
+      }
+
+      .sequence-step.active span {
+        border-color: var(--orange);
+        background: var(--orange);
+        color: #091018;
+      }
+
+      .sequence-body {
+        min-width: 0;
+        padding: 0 0 2px;
+      }
+
+      .sequence-step b {
+        display: block;
+        font-size: 14px;
+      }
+
+      .sequence-step small {
+        display: block;
+        margin-top: 2px;
+        font-size: 12px;
+      }
+
+      .pace-box {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+      }
+
+      .pace-box > div {
+        padding: 14px;
+        border-radius: 8px;
+        background: var(--surface-2);
+      }
+
+      .big-controls {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+
+      .big-controls .primary,
+      .big-controls .secondary,
+      .big-controls .danger {
+        min-height: 64px;
+      }
+
+      .form {
+        display: grid;
+        gap: 12px;
+      }
+
+      .field {
+        display: grid;
+        gap: 6px;
+      }
+
+      .field span {
+        color: var(--muted);
+        font-size: 13px;
+        font-weight: 700;
+      }
+
+      input,
+      textarea,
+      select {
+        width: 100%;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: #0d1118;
+        color: var(--text);
+        padding: 13px;
+        outline: none;
+      }
+
+      textarea {
+        min-height: 86px;
+        resize: vertical;
+      }
+
+      .import-box {
+        display: grid;
+        gap: 10px;
+      }
+
+      .hidden {
+        display: none !important;
+      }
+
+      .empty {
+        padding: 22px;
+        border: 1px dashed var(--line);
+        border-radius: 8px;
+        color: var(--muted);
+        text-align: center;
+      }
+
+      .toast {
+        position: fixed;
+        left: 50%;
+        bottom: 86px;
+        z-index: 20;
+        width: min(calc(100% - 32px), 488px);
+        padding: 12px 14px;
+        transform: translateX(-50%) translateY(20px);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 8px;
+        background: #f4f7fb;
+        color: #111722;
+        font-weight: 800;
+        opacity: 0;
+        pointer-events: none;
+        transition: 160ms ease;
+      }
+
+      .toast.show {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+      }
+
+      @media (max-width: 380px) {
+        .app {
+          padding-inline: 12px;
+        }
+
+        .hero h2 {
+          font-size: 30px;
+        }
+
+        .grid,
+        .pace-box {
+          grid-template-columns: 1fr;
+        }
+
+        .tab {
+          font-size: 10px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="app">
+      <header class="topbar">
+        <div class="brand">
+          <div class="mark" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none">
+              <path d="M13 3 6 13h5l-1 8 8-11h-5l1-7Z" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round" />
+            </svg>
+          </div>
+          <div>
+            <h1>Running Coach</h1>
+            <p class="date" id="todayLabel"></p>
+          </div>
+        </div>
+        <button class="secondary" type="button" id="resetDemoButton" aria-label="Recarregar plano base">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M3 12a9 9 0 0 1 15-6.7L21 8M21 3v5h-5M21 12a9 9 0 0 1-15 6.7L3 16M3 21v-5h5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </button>
+      </header>
+
+      <section class="section active" id="dashboard">
+        <div class="hero">
+          <div>
+            <p id="activePlanLabel">Plano ativo</p>
+            <h2 id="nextWorkoutTitle">Proximo treino</h2>
+          </div>
+          <button class="primary wide" type="button" id="startNextButton">Iniciar treino</button>
+        </div>
+
+        <div class="grid">
+          <div class="metric">
+            <div class="label">Progresso</div>
+            <div class="value" id="planProgress">0%</div>
+          </div>
+          <div class="metric">
+            <div class="label">Concluidos</div>
+            <div class="value" id="doneCount">0</div>
+          </div>
+          <div class="metric">
+            <div class="label">Km acumulados</div>
+            <div class="value" id="totalKm">0</div>
+          </div>
+          <div class="metric">
+            <div class="label">Sequencia</div>
+            <div class="value" id="streakCount">0</div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-title">
+            <h2>Proxima corrida</h2>
+            <span class="pill current" id="nextWorkoutMeta">Hoje</span>
+          </div>
+          <div class="stack" id="nextWorkoutSegments"></div>
+        </div>
+      </section>
+
+      <section class="section" id="plan">
+        <div class="panel-title">
+          <h2>Plano</h2>
+          <span class="pill" id="planCount">0 treinos</span>
+        </div>
+        <div class="stack" id="weekList"></div>
+      </section>
+
+      <section class="section" id="workout">
+        <div class="panel workout-stage">
+          <div>
+            <div class="card-row">
+              <span class="pill current" id="runnerWorkoutLabel">Treino</span>
+              <span class="pill" id="runnerStepLabel">0/0</span>
+            </div>
+            <div style="height: 18px"></div>
+            <div class="stage-name" id="runnerSegmentName">Selecione um treino</div>
+            <p class="muted" id="runnerSegmentNote">Abra um treino no plano ou inicie pelo dashboard.</p>
+          </div>
+          <div class="runner-info hidden" id="runnerNextPanel">
+            <div class="label">Proximo</div>
+            <strong id="runnerNextLabel">--</strong>
+          </div>
+          <div>
+            <div class="timer" id="runnerTimer">00:00</div>
+            <div class="progress"><div class="bar" id="runnerProgress"></div></div>
+          </div>
+          <div class="pace-box">
+            <div>
+              <div class="label">Velocidade</div>
+              <div class="value" id="runnerSpeed">--</div>
+            </div>
+            <div>
+              <div class="label">Pace</div>
+              <div class="value" id="runnerPace">--</div>
+            </div>
+          </div>
+          <div class="big-controls">
+            <button class="secondary" type="button" id="prevSegmentButton">Voltar</button>
+            <button class="secondary" type="button" id="nextSegmentButton">Avancar</button>
+            <button class="primary" type="button" id="toggleRunButton">Iniciar</button>
+            <button class="danger" type="button" id="finishRunButton">Finalizar</button>
+          </div>
+        </div>
+
+        <div class="panel" id="runnerTimelinePanel">
+          <div class="panel-title">
+            <h2>Sequencia do treino</h2>
+            <span class="pill current hidden" id="runnerRoundLabel">Round 0 de 0</span>
+          </div>
+          <div class="sequence-list" id="runnerSequenceList"></div>
+        </div>
+
+        <div class="panel hidden" id="resultPanel">
+          <div class="panel-title">
+            <h2>Registrar treino</h2>
+          </div>
+          <form class="form" id="resultForm">
+            <div class="form-row">
+              <label class="field">
+                <span>Distancia (km)</span>
+                <input id="distanceInput" inputmode="decimal" required />
+              </label>
+              <label class="field">
+                <span>Tempo (min)</span>
+                <input id="durationInput" inputmode="decimal" required />
+              </label>
+            </div>
+            <div class="form-row">
+              <label class="field">
+                <span>Esforco</span>
+                <select id="effortInput">
+                  <option value="1">1 leve</option>
+                  <option value="2">2</option>
+                  <option value="3">3</option>
+                  <option value="4">4</option>
+                  <option value="5" selected>5 moderado</option>
+                  <option value="6">6</option>
+                  <option value="7">7 forte</option>
+                  <option value="8">8</option>
+                  <option value="9">9</option>
+                  <option value="10">10 maximo</option>
+                </select>
+              </label>
+              <label class="field">
+                <span>Dor depois</span>
+                <select id="painAfterInput">
+                  <option value="0">0 nenhuma</option>
+                  <option value="1">1</option>
+                  <option value="2">2</option>
+                  <option value="3">3</option>
+                  <option value="4">4</option>
+                  <option value="5">5 alta</option>
+                </select>
+              </label>
+            </div>
+            <div class="form-row">
+              <label class="field">
+                <span>Dor antes</span>
+                <select id="painBeforeInput">
+                  <option value="0">0 nenhuma</option>
+                  <option value="1">1</option>
+                  <option value="2">2</option>
+                  <option value="3">3</option>
+                  <option value="4">4</option>
+                  <option value="5">5 alta</option>
+                </select>
+              </label>
+              <label class="field">
+                <span>Dor durante</span>
+                <select id="painDuringInput">
+                  <option value="0">0 nenhuma</option>
+                  <option value="1">1</option>
+                  <option value="2">2</option>
+                  <option value="3">3</option>
+                  <option value="4">4</option>
+                  <option value="5">5 alta</option>
+                </select>
+              </label>
+            </div>
+            <label class="field">
+              <span>Observacoes</span>
+              <textarea id="notesInput" placeholder="Esteira, rua, sensacoes, ajustes..."></textarea>
+            </label>
+            <button class="primary wide" type="submit">Salvar resultado</button>
+          </form>
+        </div>
+      </section>
+
+      <section class="section" id="history">
+        <div class="panel-title">
+          <h2>Historico</h2>
+          <span class="pill" id="historySummary">0 registros</span>
+        </div>
+        <div class="stack" id="historyList"></div>
+      </section>
+
+      <section class="section" id="data">
+        <div class="panel">
+          <div class="panel-title">
+            <h2>Dados</h2>
+          </div>
+          <div class="import-box">
+            <input type="file" id="importFile" accept="application/json,.json" />
+            <button class="primary" type="button" id="importButton">Importar JSON</button>
+            <button class="secondary" type="button" id="exportButton">Exportar backup JSON</button>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-title">
+            <h2>Formato aceito</h2>
+          </div>
+          <pre id="jsonExample" style="white-space: pre-wrap; color: var(--muted); margin: 0; font-size: 12px"></pre>
+        </div>
+      </section>
+    </main>
+
+    <nav class="tabs" aria-label="Navegacao principal">
+      <button class="tab active" type="button" data-tab="dashboard">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 13h6V4H4v9Zm10 7h6V4h-6v16ZM4 20h6v-4H4v4Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round" /></svg>
+        Inicio
+      </button>
+      <button class="tab" type="button" data-tab="plan">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M8 3v4M16 3v4M4 9h16M5 5h14a1 1 0 0 1 1 1v14H4V6a1 1 0 0 1 1-1Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" /></svg>
+        Plano
+      </button>
+      <button class="tab" type="button" data-tab="workout">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M8 5v14l11-7L8 5Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round" /></svg>
+        Treino
+      </button>
+      <button class="tab" type="button" data-tab="history">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 19V5M4 19h16M8 16v-5M12 16V8M16 16v-8" stroke="currentColor" stroke-width="2" stroke-linecap="round" /></svg>
+        Historico
+      </button>
+      <button class="tab" type="button" data-tab="data">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3v12M8 7l4-4 4 4M5 15v5h14v-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
+        Dados
+      </button>
+    </nav>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+      const STORAGE_KEY = "running-coach-static-v1";
+
+      const demoPlan = {
+        id: "10k-sub60-12-weeks",
+        name: "10 km abaixo de 1h - 12 semanas",
+        weeks: [
+          {
+            id: "w1",
+            title: "Semana 1",
+            workouts: [
+              {
+                id: "w1-t1",
+                day: "Terca",
+                title: "Esteira leve",
+                target: "Base aerobica",
+                segments: [
+                  { name: "Aquecimento", minutes: 5, speedKmh: 7.0, note: "Solto e confortavel" },
+                  { name: "Corrida leve", minutes: 25, speedKmh: 8.5, note: "Respiracao controlada" },
+                  { name: "Desaquecimento", minutes: 5, speedKmh: 6.5, note: "Reduzir aos poucos" }
+                ]
+              },
+              {
+                id: "w1-t2",
+                day: "Quinta",
+                title: "Ritmo controlado",
+                target: "Sustentar pace",
+                segments: [
+                  { name: "Aquecimento", minutes: 6, speedKmh: 7.0, note: "Sem pressa" },
+                  { name: "Bloco firme", minutes: 18, speedKmh: 9.5, note: "Forte sem quebrar" },
+                  { name: "Leve", minutes: 8, speedKmh: 8.0, note: "Recuperar correndo" },
+                  { name: "Desaquecimento", minutes: 5, speedKmh: 6.5, note: "Fechar leve" }
+                ]
+              },
+              {
+                id: "w1-t3",
+                day: "Domingo",
+                title: "Longo curto",
+                target: "Volume",
+                segments: [
+                  { name: "Aquecimento", minutes: 8, speedKmh: 7.0, note: "Comecar facil" },
+                  { name: "Corrida leve", minutes: 32, speedKmh: 8.0, note: "Pode ser rua ou esteira" }
+                ]
+              }
+            ]
+          },
+          {
+            id: "w2",
+            title: "Semana 2",
+            workouts: [
+              {
+                id: "w2-t1",
+                day: "Terca",
+                title: "Esteira progressiva",
+                target: "Controle de esforco",
+                segments: [
+                  { name: "Aquecimento", minutes: 5, speedKmh: 7.0, note: "Solto" },
+                  { name: "Leve", minutes: 12, speedKmh: 8.5, note: "Base" },
+                  { name: "Moderado", minutes: 14, speedKmh: 9.0, note: "Aumentar sem sprint" },
+                  { name: "Desaquecimento", minutes: 5, speedKmh: 6.5, note: "Respirar" }
+                ]
+              },
+              {
+                id: "w2-t2",
+                day: "Quinta",
+                title: "Tiros curtos",
+                target: "Velocidade",
+                segments: [
+                  { name: "Aquecimento", minutes: 7, speedKmh: 7.0, note: "Preparar pernas" },
+                  { name: "Tiro", minutes: 2, speedKmh: 10.5, note: "Forte" },
+                  { name: "Recuperacao", minutes: 2, speedKmh: 7.5, note: "Baixar batimento" },
+                  { name: "Tiro", minutes: 2, speedKmh: 10.5, note: "Repetir postura" },
+                  { name: "Recuperacao", minutes: 2, speedKmh: 7.5, note: "Controlado" },
+                  { name: "Tiro", minutes: 2, speedKmh: 10.5, note: "Ultimo forte" },
+                  { name: "Desaquecimento", minutes: 8, speedKmh: 6.5, note: "Soltar" }
+                ]
+              },
+              {
+                id: "w2-t3",
+                day: "Domingo",
+                title: "Longo leve",
+                target: "Resistencia",
+                segments: [
+                  { name: "Aquecimento", minutes: 8, speedKmh: 7.0, note: "Confortavel" },
+                  { name: "Corrida leve", minutes: 38, speedKmh: 8.0, note: "Sem brigar com o pace" }
+                ]
+              }
+            ]
+          },
+          {
+            id: "w3",
+            title: "Semana 3",
+            workouts: [
+              {
+                id: "w3-t1",
+                day: "Terca",
+                title: "Base com final firme",
+                target: "Fechar melhor que comecou",
+                segments: [
+                  { name: "Aquecimento", minutes: 5, speedKmh: 7.0, note: "Soltar" },
+                  { name: "Leve", minutes: 20, speedKmh: 8.5, note: "Confortavel" },
+                  { name: "Final firme", minutes: 8, speedKmh: 9.5, note: "Boa postura" },
+                  { name: "Desaquecimento", minutes: 5, speedKmh: 6.5, note: "Baixar" }
+                ]
+              },
+              {
+                id: "w3-t2",
+                day: "Quinta",
+                title: "Ritmo 10k",
+                target: "Aproximar de 6:00/km",
+                segments: [
+                  { name: "Aquecimento", minutes: 7, speedKmh: 7.0, note: "Sem pressa" },
+                  { name: "Ritmo", minutes: 8, speedKmh: 10.0, note: "Pace alvo" },
+                  { name: "Recuperacao", minutes: 4, speedKmh: 8.0, note: "Controlar" },
+                  { name: "Ritmo", minutes: 8, speedKmh: 10.0, note: "Repetir" },
+                  { name: "Desaquecimento", minutes: 7, speedKmh: 6.5, note: "Soltar" }
+                ]
+              },
+              {
+                id: "w3-t3",
+                day: "Domingo",
+                title: "Longo progressivo",
+                target: "Volume com controle",
+                segments: [
+                  { name: "Aquecimento", minutes: 8, speedKmh: 7.0, note: "Facil" },
+                  { name: "Leve", minutes: 28, speedKmh: 8.0, note: "Constante" },
+                  { name: "Final moderado", minutes: 8, speedKmh: 8.5, note: "Sem forcar demais" }
+                ]
+              }
+            ]
+          },
+          {
+            id: "w4",
+            title: "Semana 4",
+            workouts: [
+              {
+                id: "w4-t1",
+                day: "Terca",
+                title: "Regenerativo",
+                target: "Absorver carga",
+                segments: [
+                  { name: "Aquecimento", minutes: 5, speedKmh: 6.5, note: "Muito facil" },
+                  { name: "Corrida leve", minutes: 24, speedKmh: 8.0, note: "Confortavel" },
+                  { name: "Desaquecimento", minutes: 5, speedKmh: 6.5, note: "Soltar" }
+                ]
+              },
+              {
+                id: "w4-t2",
+                day: "Quinta",
+                title: "Fartlek controlado",
+                target: "Variar ritmo sem quebrar",
+                segments: [
+                  { name: "Aquecimento", minutes: 7, speedKmh: 7.0, note: "Preparar" },
+                  { name: "Forte", minutes: 3, speedKmh: 10.0, note: "Controlado" },
+                  { name: "Leve", minutes: 3, speedKmh: 8.0, note: "Recuperar" },
+                  { name: "Forte", minutes: 3, speedKmh: 10.0, note: "Repetir" },
+                  { name: "Leve", minutes: 3, speedKmh: 8.0, note: "Recuperar" },
+                  { name: "Forte", minutes: 3, speedKmh: 10.0, note: "Ultimo" },
+                  { name: "Desaquecimento", minutes: 7, speedKmh: 6.5, note: "Soltar" }
+                ]
+              },
+              {
+                id: "w4-t3",
+                day: "Domingo",
+                title: "Longo leve",
+                target: "Consistencia",
+                segments: [
+                  { name: "Aquecimento", minutes: 8, speedKmh: 7.0, note: "Facil" },
+                  { name: "Corrida leve", minutes: 42, speedKmh: 8.0, note: "Conversavel" }
+                ]
+              }
+            ]
+          },
+          {
+            id: "w5",
+            title: "Semana 5",
+            workouts: [
+              {
+                id: "w5-t1",
+                day: "Terca",
+                title: "Esteira limite 40",
+                target: "Base forte",
+                segments: [
+                  { name: "Aquecimento", minutes: 5, speedKmh: 7.0, note: "Solto" },
+                  { name: "Base", minutes: 25, speedKmh: 8.5, note: "Regular" },
+                  { name: "Moderado", minutes: 5, speedKmh: 9.5, note: "Fechar firme" },
+                  { name: "Desaquecimento", minutes: 5, speedKmh: 6.5, note: "Total 40 min" }
+                ]
+              },
+              {
+                id: "w5-t2",
+                day: "Quinta",
+                title: "Tiros medios",
+                target: "Resistencia de velocidade",
+                segments: [
+                  { name: "Aquecimento", minutes: 7, speedKmh: 7.0, note: "Preparar" },
+                  { name: "Tiro", minutes: 4, speedKmh: 10.5, note: "Forte controlado" },
+                  { name: "Recuperacao", minutes: 3, speedKmh: 7.5, note: "Recuperar" },
+                  { name: "Tiro", minutes: 4, speedKmh: 10.5, note: "Manter forma" },
+                  { name: "Recuperacao", minutes: 3, speedKmh: 7.5, note: "Respirar" },
+                  { name: "Tiro", minutes: 4, speedKmh: 10.5, note: "Ultimo" },
+                  { name: "Desaquecimento", minutes: 7, speedKmh: 6.5, note: "Soltar" }
+                ]
+              },
+              {
+                id: "w5-t3",
+                day: "Domingo",
+                title: "Longo 50",
+                target: "Chegar perto de 7 km",
+                segments: [
+                  { name: "Aquecimento", minutes: 8, speedKmh: 7.0, note: "Facil" },
+                  { name: "Corrida leve", minutes: 42, speedKmh: 8.5, note: "Regular" }
+                ]
+              }
+            ]
+          },
+          {
+            id: "w6",
+            title: "Semana 6",
+            workouts: [
+              {
+                id: "w6-t1",
+                day: "Terca",
+                title: "Progressivo 40",
+                target: "Economia de corrida",
+                segments: [
+                  { name: "Aquecimento", minutes: 5, speedKmh: 7.0, note: "Facil" },
+                  { name: "Leve", minutes: 12, speedKmh: 8.5, note: "Base" },
+                  { name: "Moderado", minutes: 12, speedKmh: 9.0, note: "Controlado" },
+                  { name: "Firme", minutes: 6, speedKmh: 10.0, note: "Pace alvo" },
+                  { name: "Desaquecimento", minutes: 5, speedKmh: 6.5, note: "Soltar" }
+                ]
+              },
+              {
+                id: "w6-t2",
+                day: "Quinta",
+                title: "Blocos de ritmo",
+                target: "Sustentar 10 km/h",
+                segments: [
+                  { name: "Aquecimento", minutes: 7, speedKmh: 7.0, note: "Preparar" },
+                  { name: "Ritmo", minutes: 10, speedKmh: 10.0, note: "Pace alvo" },
+                  { name: "Recuperacao", minutes: 4, speedKmh: 8.0, note: "Controlar" },
+                  { name: "Ritmo", minutes: 10, speedKmh: 10.0, note: "Repetir" },
+                  { name: "Desaquecimento", minutes: 7, speedKmh: 6.5, note: "Soltar" }
+                ]
+              },
+              {
+                id: "w6-t3",
+                day: "Domingo",
+                title: "Longo leve",
+                target: "Volume sustentavel",
+                segments: [
+                  { name: "Aquecimento", minutes: 8, speedKmh: 7.0, note: "Facil" },
+                  { name: "Corrida leve", minutes: 47, speedKmh: 8.5, note: "Constante" }
+                ]
+              }
+            ]
+          },
+          {
+            id: "w7",
+            title: "Semana 7",
+            workouts: [
+              {
+                id: "w7-t1",
+                day: "Terca",
+                title: "Recuperacao ativa",
+                target: "Reduzir impacto do CrossFit",
+                segments: [
+                  { name: "Aquecimento", minutes: 5, speedKmh: 6.5, note: "Muito leve" },
+                  { name: "Corrida leve", minutes: 28, speedKmh: 8.0, note: "Solto" },
+                  { name: "Desaquecimento", minutes: 5, speedKmh: 6.5, note: "Confortavel" }
+                ]
+              },
+              {
+                id: "w7-t2",
+                day: "Quinta",
+                title: "Tiros 5x3",
+                target: "Velocidade controlada",
+                segments: [
+                  { name: "Aquecimento", minutes: 7, speedKmh: 7.0, note: "Preparar" },
+                  { name: "Tiro", minutes: 3, speedKmh: 11.0, note: "Forte" },
+                  { name: "Recuperacao", minutes: 2, speedKmh: 7.5, note: "Recuperar" },
+                  { name: "Tiro", minutes: 3, speedKmh: 11.0, note: "Forte" },
+                  { name: "Recuperacao", minutes: 2, speedKmh: 7.5, note: "Recuperar" },
+                  { name: "Tiro", minutes: 3, speedKmh: 11.0, note: "Forte" },
+                  { name: "Recuperacao", minutes: 2, speedKmh: 7.5, note: "Recuperar" },
+                  { name: "Tiro", minutes: 3, speedKmh: 11.0, note: "Forte" },
+                  { name: "Recuperacao", minutes: 2, speedKmh: 7.5, note: "Recuperar" },
+                  { name: "Tiro", minutes: 3, speedKmh: 11.0, note: "Ultimo" },
+                  { name: "Desaquecimento", minutes: 6, speedKmh: 6.5, note: "Soltar" }
+                ]
+              },
+              {
+                id: "w7-t3",
+                day: "Domingo",
+                title: "Longo 60",
+                target: "Base para 10 km",
+                segments: [
+                  { name: "Aquecimento", minutes: 8, speedKmh: 7.0, note: "Facil" },
+                  { name: "Corrida leve", minutes: 52, speedKmh: 8.5, note: "Sem acelerar cedo" }
+                ]
+              }
+            ]
+          },
+          {
+            id: "w8",
+            title: "Semana 8",
+            workouts: [
+              {
+                id: "w8-t1",
+                day: "Terca",
+                title: "Esteira 40 forte",
+                target: "Confianca no pace",
+                segments: [
+                  { name: "Aquecimento", minutes: 5, speedKmh: 7.0, note: "Facil" },
+                  { name: "Leve", minutes: 15, speedKmh: 8.5, note: "Base" },
+                  { name: "Ritmo", minutes: 15, speedKmh: 10.0, note: "Pace alvo" },
+                  { name: "Desaquecimento", minutes: 5, speedKmh: 6.5, note: "Total 40 min" }
+                ]
+              },
+              {
+                id: "w8-t2",
+                day: "Quinta",
+                title: "Tempo run",
+                target: "Sustentar desconforto controlado",
+                segments: [
+                  { name: "Aquecimento", minutes: 8, speedKmh: 7.0, note: "Preparar" },
+                  { name: "Ritmo continuo", minutes: 22, speedKmh: 10.0, note: "Constante" },
+                  { name: "Desaquecimento", minutes: 8, speedKmh: 6.5, note: "Soltar" }
+                ]
+              },
+              {
+                id: "w8-t3",
+                day: "Domingo",
+                title: "Longo progressivo",
+                target: "Final mais rapido",
+                segments: [
+                  { name: "Aquecimento", minutes: 8, speedKmh: 7.0, note: "Facil" },
+                  { name: "Leve", minutes: 40, speedKmh: 8.5, note: "Regular" },
+                  { name: "Final firme", minutes: 10, speedKmh: 9.5, note: "Boa postura" }
+                ]
+              }
+            ]
+          },
+          {
+            id: "w9",
+            title: "Semana 9",
+            workouts: [
+              {
+                id: "w9-t1",
+                day: "Terca",
+                title: "Leve com strides",
+                target: "Soltar velocidade",
+                segments: [
+                  { name: "Aquecimento", minutes: 5, speedKmh: 7.0, note: "Facil" },
+                  { name: "Leve", minutes: 20, speedKmh: 8.5, note: "Base" },
+                  { name: "Aceleracao", minutes: 1, speedKmh: 11.0, note: "Rapido sem sprint" },
+                  { name: "Leve", minutes: 2, speedKmh: 7.5, note: "Recuperar" },
+                  { name: "Aceleracao", minutes: 1, speedKmh: 11.0, note: "Solto" },
+                  { name: "Leve", minutes: 2, speedKmh: 7.5, note: "Recuperar" },
+                  { name: "Desaquecimento", minutes: 5, speedKmh: 6.5, note: "Soltar" }
+                ]
+              },
+              {
+                id: "w9-t2",
+                day: "Quinta",
+                title: "Ritmo 3x8",
+                target: "Estabilizar pace alvo",
+                segments: [
+                  { name: "Aquecimento", minutes: 7, speedKmh: 7.0, note: "Preparar" },
+                  { name: "Ritmo", minutes: 8, speedKmh: 10.0, note: "Pace alvo" },
+                  { name: "Recuperacao", minutes: 3, speedKmh: 8.0, note: "Controlar" },
+                  { name: "Ritmo", minutes: 8, speedKmh: 10.0, note: "Pace alvo" },
+                  { name: "Recuperacao", minutes: 3, speedKmh: 8.0, note: "Controlar" },
+                  { name: "Ritmo", minutes: 8, speedKmh: 10.0, note: "Ultimo bloco" },
+                  { name: "Desaquecimento", minutes: 5, speedKmh: 6.5, note: "Soltar" }
+                ]
+              },
+              {
+                id: "w9-t3",
+                day: "Domingo",
+                title: "Simulado parcial",
+                target: "Medir evolucao",
+                segments: [
+                  { name: "Aquecimento", minutes: 10, speedKmh: 7.0, note: "Facil" },
+                  { name: "Bloco 6 km", minutes: 36, speedKmh: 10.0, note: "Pace alvo controlado" },
+                  { name: "Desaquecimento", minutes: 8, speedKmh: 6.5, note: "Soltar" }
+                ]
+              }
+            ]
+          },
+          {
+            id: "w10",
+            title: "Semana 10",
+            workouts: [
+              {
+                id: "w10-t1",
+                day: "Terca",
+                title: "Esteira controlada",
+                target: "Manter sem acumular fadiga",
+                segments: [
+                  { name: "Aquecimento", minutes: 5, speedKmh: 7.0, note: "Facil" },
+                  { name: "Base", minutes: 22, speedKmh: 8.5, note: "Confortavel" },
+                  { name: "Ritmo", minutes: 8, speedKmh: 10.0, note: "Pace alvo" },
+                  { name: "Desaquecimento", minutes: 5, speedKmh: 6.5, note: "Total 40 min" }
+                ]
+              },
+              {
+                id: "w10-t2",
+                day: "Quinta",
+                title: "Tiros longos",
+                target: "Tolerancia ao ritmo",
+                segments: [
+                  { name: "Aquecimento", minutes: 8, speedKmh: 7.0, note: "Preparar" },
+                  { name: "Tiro", minutes: 6, speedKmh: 10.5, note: "Forte controlado" },
+                  { name: "Recuperacao", minutes: 3, speedKmh: 8.0, note: "Recuperar" },
+                  { name: "Tiro", minutes: 6, speedKmh: 10.5, note: "Manter" },
+                  { name: "Recuperacao", minutes: 3, speedKmh: 8.0, note: "Recuperar" },
+                  { name: "Tiro", minutes: 6, speedKmh: 10.5, note: "Ultimo" },
+                  { name: "Desaquecimento", minutes: 7, speedKmh: 6.5, note: "Soltar" }
+                ]
+              },
+              {
+                id: "w10-t3",
+                day: "Domingo",
+                title: "Longo 70",
+                target: "Confiança para 10 km",
+                segments: [
+                  { name: "Aquecimento", minutes: 10, speedKmh: 7.0, note: "Facil" },
+                  { name: "Corrida leve", minutes: 50, speedKmh: 8.5, note: "Regular" },
+                  { name: "Final firme", minutes: 10, speedKmh: 9.5, note: "Nao sprintar" }
+                ]
+              }
+            ]
+          },
+          {
+            id: "w11",
+            title: "Semana 11",
+            workouts: [
+              {
+                id: "w11-t1",
+                day: "Terca",
+                title: "Reducao leve",
+                target: "Chegar inteiro",
+                segments: [
+                  { name: "Aquecimento", minutes: 5, speedKmh: 7.0, note: "Facil" },
+                  { name: "Corrida leve", minutes: 22, speedKmh: 8.5, note: "Solto" },
+                  { name: "Ritmo curto", minutes: 6, speedKmh: 10.0, note: "Lembrar pace" },
+                  { name: "Desaquecimento", minutes: 5, speedKmh: 6.5, note: "Soltar" }
+                ]
+              },
+              {
+                id: "w11-t2",
+                day: "Quinta",
+                title: "Pace alvo curto",
+                target: "Afinar ritmo",
+                segments: [
+                  { name: "Aquecimento", minutes: 8, speedKmh: 7.0, note: "Preparar" },
+                  { name: "Ritmo", minutes: 15, speedKmh: 10.0, note: "Pace alvo facil" },
+                  { name: "Desaquecimento", minutes: 8, speedKmh: 6.5, note: "Sem fadigar" }
+                ]
+              },
+              {
+                id: "w11-t3",
+                day: "Domingo",
+                title: "Longo reduzido",
+                target: "Manter volume sem cansar",
+                segments: [
+                  { name: "Aquecimento", minutes: 8, speedKmh: 7.0, note: "Facil" },
+                  { name: "Corrida leve", minutes: 42, speedKmh: 8.5, note: "Confortavel" }
+                ]
+              }
+            ]
+          },
+          {
+            id: "w12",
+            title: "Semana 12",
+            workouts: [
+              {
+                id: "w12-t1",
+                day: "Terca",
+                title: "Ativacao",
+                target: "Manter pernas vivas",
+                segments: [
+                  { name: "Aquecimento", minutes: 5, speedKmh: 7.0, note: "Facil" },
+                  { name: "Leve", minutes: 18, speedKmh: 8.5, note: "Solto" },
+                  { name: "Pace alvo", minutes: 5, speedKmh: 10.0, note: "Controlado" },
+                  { name: "Desaquecimento", minutes: 5, speedKmh: 6.5, note: "Soltar" }
+                ]
+              },
+              {
+                id: "w12-t2",
+                day: "Quinta",
+                title: "Soltura pre-teste",
+                target: "Chegar descansado",
+                segments: [
+                  { name: "Aquecimento", minutes: 5, speedKmh: 6.5, note: "Muito facil" },
+                  { name: "Corrida leve", minutes: 20, speedKmh: 8.0, note: "Sem forcar" },
+                  { name: "Aceleracao", minutes: 1, speedKmh: 10.5, note: "Solta" },
+                  { name: "Desaquecimento", minutes: 5, speedKmh: 6.5, note: "Encerrar bem" }
+                ]
+              },
+              {
+                id: "w12-t3",
+                day: "Domingo",
+                title: "Teste 10 km sub 60",
+                target: "Completar 10 km abaixo de 1h",
+                segments: [
+                  { name: "Aquecimento", minutes: 10, speedKmh: 7.0, note: "Soltar antes do teste" },
+                  { name: "10 km alvo", minutes: 60, speedKmh: 10.0, note: "Manter media de 6:00/km" },
+                  { name: "Desaquecimento", minutes: 8, speedKmh: 6.5, note: "Recuperar" }
+                ]
+              }
+            ]
+          }
+        ]
+      };
+
+      const state = loadState();
+      let selectedWorkoutId = findNextWorkout()?.id || demoPlan.weeks[0].workouts[0].id;
+      let activeSegmentIndex = 0;
+      let elapsedInSegment = 0;
+      let intervalId = null;
+
+      function loadState() {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        if (!stored) {
+          return { plan: demoPlan, results: [] };
+        }
+
+        try {
+          const parsed = JSON.parse(stored);
+          return {
+            plan: parsed.plan || demoPlan,
+            results: Array.isArray(parsed.results) ? parsed.results : []
+          };
+        } catch {
+          return { plan: demoPlan, results: [] };
+        }
+      }
+
+      function saveState() {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      }
+
+      function allWorkouts() {
+        return state.plan.weeks.flatMap((week) =>
+          week.workouts.map((workout) => ({ ...workout, weekTitle: week.title }))
+        );
+      }
+
+      function getWorkout(id) {
+        return allWorkouts().find((workout) => workout.id === id);
+      }
+
+      function hasResult(workoutId) {
+        return state.results.some((result) => result.workoutId === workoutId);
+      }
+
+      function findNextWorkout() {
+        return allWorkouts().find((workout) => !hasResult(workout.id)) || allWorkouts()[0];
+      }
+
+      function totalPlannedMinutes(workout) {
+        return workout.segments.reduce((sum, segment) => sum + Number(segment.minutes || 0), 0);
+      }
+
+      function segmentSeconds(segment) {
+        return Math.max(1, Math.round(Number(segment.minutes || 0) * 60));
+      }
+
+      function speedToPace(speedKmh) {
+        if (!speedKmh) return "--";
+        const minutesPerKm = 60 / Number(speedKmh);
+        const minutes = Math.floor(minutesPerKm);
+        const seconds = Math.round((minutesPerKm - minutes) * 60);
+        return `${minutes}:${String(seconds).padStart(2, "0")}/km`;
+      }
+
+      function segmentKey(segment) {
+        return String(segment?.name || "").trim().toLowerCase();
+      }
+
+      function findIntervalContext(workout, index) {
+        const segments = workout.segments;
+        const matches = [];
+
+        for (let start = 0; start < segments.length - 3; start += 1) {
+          const first = segmentKey(segments[start]);
+          const second = segmentKey(segments[start + 1]);
+          if (!first || !second || first === second) continue;
+          if (segmentKey(segments[start + 2]) !== first) continue;
+
+          let end = start + 2;
+          for (let cursor = start + 3; cursor < segments.length; cursor += 1) {
+            const expected = (cursor - start) % 2 === 0 ? first : second;
+            if (segmentKey(segments[cursor]) !== expected) break;
+            end = cursor;
+          }
+
+          const length = end - start + 1;
+          if (length >= 3 && index >= start && index <= end) {
+            matches.push({ start, end, first, second, length });
+          }
+        }
+
+        if (!matches.length) return null;
+
+        const block = matches.sort((a, b) => b.length - a.length)[0];
+        const blockSegments = segments.slice(block.start, block.end + 1);
+        const currentOffset = index - block.start;
+        const totalRounds = blockSegments.filter((segment) => segmentKey(segment) === block.first).length;
+        const round = Math.max(
+          1,
+          blockSegments.slice(0, currentOffset + 1).filter((segment) => segmentKey(segment) === block.first).length
+        );
+
+        return {
+          round,
+          totalRounds,
+          start: block.start,
+          currentOffset,
+          segments: blockSegments
+        };
+      }
+
+      function formatTimer(totalSeconds) {
+        const minutes = Math.floor(totalSeconds / 60);
+        const seconds = totalSeconds % 60;
+        return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+      }
+
+      function showTab(tabId) {
+        document.querySelectorAll(".section").forEach((section) => section.classList.toggle("active", section.id === tabId));
+        document.querySelectorAll(".tab").forEach((tab) => tab.classList.toggle("active", tab.dataset.tab === tabId));
+        render();
+      }
+
+      function showToast(message) {
+        const toast = document.getElementById("toast");
+        toast.textContent = message;
+        toast.classList.add("show");
+        window.setTimeout(() => toast.classList.remove("show"), 2200);
+      }
+
+      function renderDashboard() {
+        const workouts = allWorkouts();
+        const done = state.results.length;
+        const next = findNextWorkout();
+        const totalKm = state.results.reduce((sum, result) => sum + Number(result.distanceKm || 0), 0);
+        const progress = workouts.length ? Math.round((done / workouts.length) * 100) : 0;
+
+        document.getElementById("activePlanLabel").textContent = state.plan.name || "Plano ativo";
+        document.getElementById("nextWorkoutTitle").textContent = next ? next.title : "Importe um plano";
+        document.getElementById("planProgress").textContent = `${progress}%`;
+        document.getElementById("doneCount").textContent = `${done}/${workouts.length}`;
+        document.getElementById("totalKm").textContent = totalKm.toFixed(1);
+        document.getElementById("streakCount").textContent = String(calculateStreak());
+        document.getElementById("nextWorkoutMeta").textContent = next ? `${next.weekTitle} - ${next.day}` : "--";
+        document.getElementById("startNextButton").disabled = !next;
+
+        const list = document.getElementById("nextWorkoutSegments");
+        list.innerHTML = "";
+        if (!next) {
+          list.innerHTML = '<div class="empty">Nenhum treino disponivel.</div>';
+          return;
+        }
+
+        next.segments.forEach((segment) => {
+          const item = document.createElement("div");
+          item.className = "card-row";
+          item.innerHTML = `<span>${segment.name}</span><span class="pill">${segment.minutes} min - ${segment.speedKmh} km/h</span>`;
+          list.appendChild(item);
+        });
+      }
+
+      function renderPlan() {
+        const list = document.getElementById("weekList");
+        list.innerHTML = "";
+        document.getElementById("planCount").textContent = `${allWorkouts().length} treinos`;
+
+        state.plan.weeks.forEach((week) => {
+          const title = document.createElement("div");
+          title.className = "label";
+          title.textContent = week.title;
+          list.appendChild(title);
+
+          week.workouts.forEach((workout) => {
+            const completed = hasResult(workout.id);
+            const button = document.createElement("button");
+            button.type = "button";
+            button.className = "card";
+            button.innerHTML = `
+              <div class="card-row">
+                <div>
+                  <h3>${workout.day} - ${workout.title}</h3>
+                  <p class="muted">${workout.target || ""} - ${totalPlannedMinutes(workout)} min</p>
+                </div>
+                <span class="pill ${completed ? "done" : ""}">${completed ? "Concluido" : "Planejado"}</span>
+              </div>
+            `;
+            button.addEventListener("click", () => {
+              selectWorkout(workout.id);
+              showTab("workout");
+            });
+            list.appendChild(button);
+          });
+        });
+      }
+
+      function renderRunner() {
+        const workout = getWorkout(selectedWorkoutId);
+        const hasWorkout = Boolean(workout);
+        document.getElementById("toggleRunButton").disabled = !hasWorkout;
+        document.getElementById("finishRunButton").disabled = !hasWorkout;
+        document.getElementById("prevSegmentButton").disabled = !hasWorkout || activeSegmentIndex === 0;
+        document.getElementById("nextSegmentButton").disabled = !hasWorkout || activeSegmentIndex >= workout.segments.length - 1;
+
+        if (!workout) {
+          document.getElementById("runnerWorkoutLabel").textContent = "Treino";
+          document.getElementById("runnerStepLabel").textContent = "0/0";
+          document.getElementById("runnerSegmentName").textContent = "Selecione um treino";
+          document.getElementById("runnerSegmentNote").textContent = "Abra um treino no plano ou inicie pelo dashboard.";
+          document.getElementById("runnerTimer").textContent = "00:00";
+          document.getElementById("runnerSpeed").textContent = "--";
+          document.getElementById("runnerPace").textContent = "--";
+          document.getElementById("runnerProgress").style.width = "0%";
+          document.getElementById("runnerNextPanel").classList.add("hidden");
+          document.getElementById("runnerRoundLabel").classList.add("hidden");
+          document.getElementById("runnerSequenceList").innerHTML = '<div class="empty">Selecione um treino para ver a sequencia.</div>';
+          return;
+        }
+
+        const segment = workout.segments[activeSegmentIndex];
+        const nextSegment = workout.segments[activeSegmentIndex + 1];
+        const intervalContext = findIntervalContext(workout, activeSegmentIndex);
+        const duration = segmentSeconds(segment);
+        const percent = Math.min(100, Math.round((elapsedInSegment / duration) * 100));
+        document.getElementById("runnerWorkoutLabel").textContent = workout.title;
+        document.getElementById("runnerStepLabel").textContent = `${activeSegmentIndex + 1}/${workout.segments.length}`;
+        document.getElementById("runnerSegmentName").textContent = segment.name;
+        document.getElementById("runnerSegmentNote").textContent = segment.note || workout.target || "";
+        document.getElementById("runnerTimer").textContent = formatTimer(Math.max(0, duration - elapsedInSegment));
+        document.getElementById("runnerSpeed").textContent = `${Number(segment.speedKmh || 0).toFixed(1)} km/h`;
+        document.getElementById("runnerPace").textContent = speedToPace(segment.speedKmh);
+        document.getElementById("runnerProgress").style.width = `${percent}%`;
+        document.getElementById("toggleRunButton").textContent = intervalId ? "Pausar" : elapsedInSegment > 0 ? "Continuar" : "Iniciar";
+
+        const nextPanel = document.getElementById("runnerNextPanel");
+        if (nextSegment) {
+          nextPanel.classList.remove("hidden");
+          document.getElementById("runnerNextLabel").textContent = `${nextSegment.name} - ${nextSegment.minutes} min - ${Number(nextSegment.speedKmh || 0).toFixed(1)} km/h`;
+        } else {
+          nextPanel.classList.add("hidden");
+        }
+
+        const roundLabel = document.getElementById("runnerRoundLabel");
+        const sequenceList = document.getElementById("runnerSequenceList");
+        sequenceList.innerHTML = "";
+        if (intervalContext) {
+          roundLabel.classList.remove("hidden");
+          roundLabel.textContent = `Round ${intervalContext.round} de ${intervalContext.totalRounds}`;
+        } else {
+          roundLabel.classList.add("hidden");
+        }
+
+        workout.segments.forEach((item, itemIndex) => {
+          const step = document.createElement("div");
+          step.className = `sequence-step ${itemIndex === activeSegmentIndex ? "active" : ""}`;
+          step.innerHTML = `<span>${itemIndex + 1}</span><div class="sequence-body"><b>${item.name}</b><small>${item.minutes} min - ${Number(item.speedKmh || 0).toFixed(1)} km/h - ${speedToPace(item.speedKmh)}</small></div>`;
+          sequenceList.appendChild(step);
+        });
+      }
+
+      function renderHistory() {
+        const list = document.getElementById("historyList");
+        list.innerHTML = "";
+        document.getElementById("historySummary").textContent = `${state.results.length} registros`;
+
+        if (!state.results.length) {
+          list.innerHTML = '<div class="empty">Nenhum treino registrado ainda.</div>';
+          return;
+        }
+
+        [...state.results].reverse().forEach((result) => {
+          const workout = getWorkout(result.workoutId);
+          const pace = Number(result.durationMin || 0) / Math.max(0.01, Number(result.distanceKm || 0));
+          const card = document.createElement("div");
+          card.className = "card";
+          card.innerHTML = `
+            <div class="card-row">
+              <div>
+                <h3>${workout ? workout.title : "Treino importado"}</h3>
+                <p class="muted">${new Date(result.completedAt).toLocaleDateString("pt-BR")} - ${Number(result.distanceKm).toFixed(1)} km - ${pace.toFixed(1)} min/km</p>
+              </div>
+              <span class="pill done">RPE ${result.effort}</span>
+            </div>
+            ${result.notes ? `<p class="muted" style="margin-top: 8px">${result.notes}</p>` : ""}
+          `;
+          list.appendChild(card);
+        });
+      }
+
+      function renderDataExample() {
+        document.getElementById("jsonExample").textContent = JSON.stringify(
+          {
+            plan: {
+              id: "meu-plano",
+              name: "10 km sub 60",
+              weeks: [
+                {
+                  id: "semana-1",
+                  title: "Semana 1",
+                  workouts: [
+                    {
+                      id: "s1-t1",
+                      day: "Terca",
+                      title: "Esteira leve",
+                      target: "Base",
+                      segments: [{ name: "Corrida leve", minutes: 30, speedKmh: 8.5, note: "Confortavel" }]
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          null,
+          2
+        );
+      }
+
+      function render() {
+        document.getElementById("todayLabel").textContent = new Date().toLocaleDateString("pt-BR", {
+          weekday: "long",
+          day: "2-digit",
+          month: "long"
+        });
+        renderDashboard();
+        renderPlan();
+        renderRunner();
+        renderHistory();
+        renderDataExample();
+      }
+
+      function selectWorkout(id) {
+        stopTimer();
+        selectedWorkoutId = id;
+        activeSegmentIndex = 0;
+        elapsedInSegment = 0;
+        document.getElementById("resultPanel").classList.add("hidden");
+        renderRunner();
+      }
+
+      function startTimer() {
+        if (intervalId) return;
+        intervalId = window.setInterval(() => {
+          const workout = getWorkout(selectedWorkoutId);
+          if (!workout) return;
+          const segment = workout.segments[activeSegmentIndex];
+          elapsedInSegment += 1;
+          if (elapsedInSegment >= segmentSeconds(segment)) {
+            if (activeSegmentIndex < workout.segments.length - 1) {
+              activeSegmentIndex += 1;
+              elapsedInSegment = 0;
+              showToast("Proxima etapa");
+            } else {
+              stopTimer();
+              openResultForm();
+              showToast("Treino finalizado");
+            }
+          }
+          renderRunner();
+        }, 1000);
+        renderRunner();
+      }
+
+      function stopTimer() {
+        if (intervalId) {
+          window.clearInterval(intervalId);
+          intervalId = null;
+        }
+      }
+
+      function openResultForm() {
+        stopTimer();
+        const workout = getWorkout(selectedWorkoutId);
+        document.getElementById("resultPanel").classList.remove("hidden");
+        if (workout) {
+          document.getElementById("durationInput").value = String(totalPlannedMinutes(workout));
+          const estimatedKm = workout.segments.reduce((sum, segment) => sum + (Number(segment.speedKmh || 0) * Number(segment.minutes || 0)) / 60, 0);
+          document.getElementById("distanceInput").value = estimatedKm.toFixed(2);
+        }
+      }
+
+      function calculateStreak() {
+        const days = new Set(state.results.map((result) => new Date(result.completedAt).toDateString()));
+        return days.size;
+      }
+
+      function validateImportedPlan(input) {
+        const plan = input.plan || input;
+        if (!plan || typeof plan !== "object" || !Array.isArray(plan.weeks)) {
+          throw new Error("JSON precisa conter plan.weeks ou weeks.");
+        }
+
+        plan.weeks.forEach((week, weekIndex) => {
+          if (!Array.isArray(week.workouts)) throw new Error(`Semana ${weekIndex + 1} sem workouts.`);
+          week.workouts.forEach((workout, workoutIndex) => {
+            if (!Array.isArray(workout.segments)) throw new Error(`Treino ${workoutIndex + 1} sem segments.`);
+            workout.segments.forEach((segment, segmentIndex) => {
+              if (!segment.name || !segment.minutes || !segment.speedKmh) {
+                throw new Error(`Segmento ${segmentIndex + 1} precisa de name, minutes e speedKmh.`);
+              }
+            });
+          });
+        });
+
+        return {
+          id: plan.id || `plan-${Date.now()}`,
+          name: plan.name || "Plano importado",
+          weeks: plan.weeks.map((week, weekIndex) => ({
+            id: week.id || `week-${weekIndex + 1}`,
+            title: week.title || `Semana ${weekIndex + 1}`,
+            workouts: week.workouts.map((workout, workoutIndex) => ({
+              id: workout.id || `w${weekIndex + 1}-t${workoutIndex + 1}`,
+              day: workout.day || "Dia livre",
+              title: workout.title || `Treino ${workoutIndex + 1}`,
+              target: workout.target || "",
+              segments: workout.segments.map((segment) => ({
+                name: String(segment.name),
+                minutes: Number(segment.minutes),
+                speedKmh: Number(segment.speedKmh),
+                note: segment.note ? String(segment.note) : ""
+              }))
+            }))
+          }))
+        };
+      }
+
+      document.querySelectorAll(".tab").forEach((button) => {
+        button.addEventListener("click", () => showTab(button.dataset.tab));
+      });
+
+      document.getElementById("startNextButton").addEventListener("click", () => {
+        const next = findNextWorkout();
+        if (!next) return;
+        selectWorkout(next.id);
+        showTab("workout");
+        startTimer();
+      });
+
+      document.getElementById("toggleRunButton").addEventListener("click", () => {
+        if (intervalId) {
+          stopTimer();
+        } else {
+          startTimer();
+        }
+        renderRunner();
+      });
+
+      document.getElementById("prevSegmentButton").addEventListener("click", () => {
+        activeSegmentIndex = Math.max(0, activeSegmentIndex - 1);
+        elapsedInSegment = 0;
+        renderRunner();
+      });
+
+      document.getElementById("nextSegmentButton").addEventListener("click", () => {
+        const workout = getWorkout(selectedWorkoutId);
+        if (!workout) return;
+        activeSegmentIndex = Math.min(workout.segments.length - 1, activeSegmentIndex + 1);
+        elapsedInSegment = 0;
+        renderRunner();
+      });
+
+      document.getElementById("finishRunButton").addEventListener("click", openResultForm);
+
+      document.getElementById("resultForm").addEventListener("submit", (event) => {
+        event.preventDefault();
+        const workout = getWorkout(selectedWorkoutId);
+        if (!workout) return;
+
+        const result = {
+          id: `result-${Date.now()}`,
+          workoutId: workout.id,
+          completedAt: new Date().toISOString(),
+          distanceKm: Number(String(document.getElementById("distanceInput").value).replace(",", ".")),
+          durationMin: Number(String(document.getElementById("durationInput").value).replace(",", ".")),
+          effort: Number(document.getElementById("effortInput").value),
+          painBefore: Number(document.getElementById("painBeforeInput").value),
+          painDuring: Number(document.getElementById("painDuringInput").value),
+          painAfter: Number(document.getElementById("painAfterInput").value),
+          notes: document.getElementById("notesInput").value.trim()
+        };
+
+        state.results = state.results.filter((item) => item.workoutId !== workout.id);
+        state.results.push(result);
+        saveState();
+        document.getElementById("resultPanel").classList.add("hidden");
+        showToast("Resultado salvo");
+        showTab("history");
+      });
+
+      document.getElementById("importButton").addEventListener("click", async () => {
+        const file = document.getElementById("importFile").files[0];
+        if (!file) {
+          showToast("Escolha um arquivo JSON");
+          return;
+        }
+
+        try {
+          const imported = JSON.parse(await file.text());
+          state.plan = validateImportedPlan(imported);
+          state.results = Array.isArray(imported.results) ? imported.results : [];
+          saveState();
+          selectWorkout(findNextWorkout()?.id);
+          showToast("Plano importado");
+          showTab("dashboard");
+        } catch (error) {
+          showToast(error.message || "JSON invalido");
+        }
+      });
+
+      document.getElementById("exportButton").addEventListener("click", () => {
+        const payload = JSON.stringify(state, null, 2);
+        const blob = new Blob([payload], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `running-coach-backup-${new Date().toISOString().slice(0, 10)}.json`;
+        link.click();
+        URL.revokeObjectURL(url);
+        showToast("Backup exportado");
+      });
+
+      document.getElementById("resetDemoButton").addEventListener("click", () => {
+        if (!confirm("Recarregar o plano base e apagar registros locais?")) return;
+        stopTimer();
+        state.plan = demoPlan;
+        state.results = [];
+        saveState();
+        selectWorkout(findNextWorkout()?.id);
+        showToast("Plano base restaurado");
+        showTab("dashboard");
+      });
+
+      render();
+    </script>
+  </body>
+</html>

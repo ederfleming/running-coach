@@ -223,6 +223,8 @@ Entregas:
 - finalizar treino;
 - salvar resultado;
 - ver resultado no historico;
+- copiar resumo do historico para analise no chat;
+- baixar historico JSON;
 - fechar e abrir novamente mantendo os dados;
 - exportar backup JSON;
 - exportar backup JSON.

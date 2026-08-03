@@ -539,6 +539,13 @@
         resize: vertical;
       }
 
+      .export-preview {
+        min-height: 180px;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+        font-size: 12px;
+        line-height: 1.45;
+      }
+
       .import-box {
         display: grid;
         gap: 10px;
@@ -803,6 +810,18 @@
           <span class="pill" id="historySummary">0 registros</span>
         </div>
         <div class="stack" id="historyList"></div>
+
+        <div class="panel">
+          <div class="panel-title">
+            <h2>Exportar para analise</h2>
+            <span class="pill">Chat</span>
+          </div>
+          <div class="import-box">
+            <button class="primary" type="button" id="copyHistoryButton">Copiar resumo</button>
+            <button class="secondary" type="button" id="exportHistoryButton">Baixar historico JSON</button>
+            <textarea class="export-preview" id="historyExportText" readonly></textarea>
+          </div>
+        </div>
       </section>
 
       <section class="section" id="data">
@@ -1635,6 +1654,7 @@
         const list = document.getElementById("historyList");
         list.innerHTML = "";
         document.getElementById("historySummary").textContent = `${state.results.length} registros`;
+        document.getElementById("historyExportText").value = buildHistoryAnalysisText();
 
         if (!state.results.length) {
           list.innerHTML = '<div class="empty">Nenhum treino registrado ainda.</div>';
@@ -1755,6 +1775,119 @@
         const days = new Set(state.results.map((result) => new Date(result.completedAt).toDateString()));
         return days.size;
       }
+
+      function buildHistoryAnalysisPayload() {
+        const workouts = allWorkouts();
+        const enrichedResults = [...state.results]
+          .sort((a, b) => new Date(a.completedAt) - new Date(b.completedAt))
+          .map((result) => {
+            const workout = getWorkout(result.workoutId);
+            const distanceKm = Number(result.distanceKm || 0);
+            const durationMin = Number(result.durationMin || 0);
+            return {
+              completedAt: result.completedAt,
+              date: new Date(result.completedAt).toLocaleDateString("pt-BR"),
+              workoutId: result.workoutId,
+              week: workout?.weekTitle || null,
+              day: workout?.day || null,
+              title: workout?.title || "Treino importado",
+              target: workout?.target || null,
+              plannedMinutes: workout ? totalPlannedMinutes(workout) : null,
+              plannedSegments: workout?.segments || [],
+              distanceKm,
+              durationMin,
+              averagePaceMinKm: distanceKm > 0 ? Number((durationMin / distanceKm).toFixed(2)) : null,
+              effort: Number(result.effort || 0),
+              painBefore: Number(result.painBefore || 0),
+              painDuring: Number(result.painDuring || 0),
+              painAfter: Number(result.painAfter || 0),
+              notes: result.notes || ""
+            };
+          });
+
+        const totalDistanceKm = enrichedResults.reduce((sum, item) => sum + item.distanceKm, 0);
+        const totalDurationMin = enrichedResults.reduce((sum, item) => sum + item.durationMin, 0);
+        const averageEffort = enrichedResults.length
+          ? enrichedResults.reduce((sum, item) => sum + item.effort, 0) / enrichedResults.length
+          : 0;
+
+        return {
+          exportedAt: new Date().toISOString(),
+          plan: {
+            id: state.plan.id || null,
+            name: state.plan.name || null,
+            totalWeeks: state.plan.weeks?.length || 0,
+            totalWorkouts: workouts.length
+          },
+          summary: {
+            completedWorkouts: enrichedResults.length,
+            totalDistanceKm: Number(totalDistanceKm.toFixed(2)),
+            totalDurationMin: Number(totalDurationMin.toFixed(1)),
+            averagePaceMinKm: totalDistanceKm > 0 ? Number((totalDurationMin / totalDistanceKm).toFixed(2)) : null,
+            averageEffort: Number(averageEffort.toFixed(1)),
+            streakDays: calculateStreak()
+          },
+          results: enrichedResults
+        };
+      }
+
+      function formatPaceDecimal(value) {
+        if (!value && value !== 0) return "--";
+        const minutes = Math.floor(value);
+        const seconds = Math.round((value - minutes) * 60);
+        return `${minutes}:${String(seconds).padStart(2, "0")}/km`;
+      }
+
+      function buildHistoryAnalysisText() {
+        const payload = buildHistoryAnalysisPayload();
+        const lines = [
+          "# Historico Running Coach",
+          "",
+          `Plano: ${payload.plan.name || "sem plano importado"}`,
+          `Exportado em: ${new Date(payload.exportedAt).toLocaleString("pt-BR")}`,
+          "",
+          "## Resumo",
+          `- Treinos concluidos: ${payload.summary.completedWorkouts}/${payload.plan.totalWorkouts}`,
+          `- Distancia total: ${payload.summary.totalDistanceKm} km`,
+          `- Tempo total: ${payload.summary.totalDurationMin} min`,
+          `- Pace medio: ${formatPaceDecimal(payload.summary.averagePaceMinKm)}`,
+          `- Esforco medio: ${payload.summary.averageEffort}/10`,
+          `- Sequencia registrada: ${payload.summary.streakDays} dias`,
+          "",
+          "## Treinos"
+        ];
+
+        if (!payload.results.length) {
+          lines.push("Nenhum treino registrado ainda.");
+          return lines.join("\n");
+        }
+
+        payload.results.forEach((item, index) => {
+          lines.push(
+            "",
+            `### ${index + 1}. ${item.date} - ${item.title}`,
+            `- Semana/dia: ${item.week || "--"} / ${item.day || "--"}`,
+            `- Objetivo: ${item.target || "--"}`,
+            `- Resultado: ${item.distanceKm.toFixed(2)} km em ${item.durationMin.toFixed(1)} min (${formatPaceDecimal(item.averagePaceMinKm)})`,
+            `- Esforco percebido: ${item.effort}/10`,
+            `- Dor: antes ${item.painBefore}/5, durante ${item.painDuring}/5, depois ${item.painAfter}/5`,
+            `- Observacoes: ${item.notes || "--"}`
+          );
+        });
+
+        return lines.join("\n");
+      }
+
+      function downloadJson(filename, data) {
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = filename;
+        link.click();
+        URL.revokeObjectURL(url);
+      }
+
 
       function validateImportedPlan(input) {
         const plan = input.plan || input;
@@ -1887,15 +2020,25 @@
       });
 
       document.getElementById("exportButton").addEventListener("click", () => {
-        const payload = JSON.stringify(state, null, 2);
-        const blob = new Blob([payload], { type: "application/json" });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.href = url;
-        link.download = `running-coach-backup-${new Date().toISOString().slice(0, 10)}.json`;
-        link.click();
-        URL.revokeObjectURL(url);
+        downloadJson(`running-coach-backup-${new Date().toISOString().slice(0, 10)}.json`, state);
         showToast("Backup exportado");
+      });
+
+      document.getElementById("copyHistoryButton").addEventListener("click", async () => {
+        const text = buildHistoryAnalysisText();
+        document.getElementById("historyExportText").value = text;
+        try {
+          await navigator.clipboard.writeText(text);
+          showToast("Resumo copiado");
+        } catch {
+          document.getElementById("historyExportText").select();
+          showToast("Selecione e copie o resumo");
+        }
+      });
+
+      document.getElementById("exportHistoryButton").addEventListener("click", () => {
+        downloadJson(`running-coach-history-${new Date().toISOString().slice(0, 10)}.json`, buildHistoryAnalysisPayload());
+        showToast("Historico exportado");
       });
 
       document.getElementById("resetDemoButton").addEventListener("click", () => {

@@ -2,7 +2,25 @@
 
 Aplicativo pessoal para acompanhar treinos de corrida de forma local-first, simples e usavel durante a corrida.
 
-Esta primeira versao foi implementada como um `index.html` estatico para ser facil de abrir, testar e compartilhar. Os dados ficam salvos localmente no navegador do aparelho via `localStorage`.
+Esta primeira versao foi implementada como um `index.html` estatico para ser facil de abrir, testar, compartilhar e publicar no GitHub Pages. Os dados ficam salvos localmente no navegador do aparelho via `localStorage`.
+
+## Publicacao e privacidade
+
+O projeto pode ser publicado gratuitamente no GitHub Pages usando um repositorio publico.
+
+Pontos importantes:
+
+- o codigo do app fica publico no GitHub;
+- plano, historico e resultados ficam salvos localmente no navegador, nao no repositorio;
+- nao versionar arquivos de backup, historico exportado ou planos pessoais sensiveis;
+- ao publicar mudancas, basta enviar `index.html`, `README.md`, `manifest.webmanifest`, `icon.svg` e `service-worker.js`;
+- repositorio privado com GitHub Pages pode exigir plano pago, dependendo da conta/organizacao.
+
+A URL publica esperada neste projeto e:
+
+```txt
+https://ederfleming.github.io/running-coach/
+```
 
 ## Objetivo
 

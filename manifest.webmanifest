@@ -1,0 +1,19 @@
+{
+  "name": "Running Coach",
+  "short_name": "Run Coach",
+  "description": "Acompanhamento local de treinos de corrida.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#090b10",
+  "theme_color": "#090b10",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

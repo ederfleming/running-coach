@@ -28,9 +28,9 @@ Incluido:
 - controles de iniciar, pausar, continuar, voltar etapa, avancar etapa e finalizar;
 - formulario de resultado com distancia, tempo, esforco, dor antes/durante/depois e observacoes;
 - historico local;
-- importacao de JSON;
+- importacao de JSON direto na tela inicial e na tela de dados;
 - exportacao de backup JSON;
-- plano base de 12 semanas para 10 km abaixo de 1 hora.
+- estado inicial sem treinos cadastrados.
 
 Fora desta versao:
 
@@ -216,7 +216,8 @@ Entregas:
 ## Criterios de sucesso do MVP atual
 
 - abrir `index.html` no navegador;
-- visualizar plano base de 12 semanas;
+- iniciar sem treinos cadastrados;
+- importar plano JSON valido pela tela inicial;
 - iniciar um treino;
 - avancar/voltar etapas;
 - finalizar treino;
@@ -224,7 +225,7 @@ Entregas:
 - ver resultado no historico;
 - fechar e abrir novamente mantendo os dados;
 - exportar backup JSON;
-- importar plano JSON valido.
+- exportar backup JSON.
 
 ## Proximas decisoes
 

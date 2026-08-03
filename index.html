@@ -484,6 +484,8 @@
       }
 
       .field {
+        flex: 1 1 0;
+        min-width: 0;
         display: grid;
         gap: 6px;
       }
@@ -498,12 +500,31 @@
       textarea,
       select {
         width: 100%;
+        min-height: 58px;
         border: 1px solid var(--line);
         border-radius: 8px;
         background: #0d1118;
         color: var(--text);
         padding: 13px;
         outline: none;
+      }
+
+      select {
+        appearance: none;
+        background:
+          linear-gradient(45deg, transparent 50%, var(--text) 50%),
+          linear-gradient(135deg, var(--text) 50%, transparent 50%),
+          #0d1118;
+        background-position:
+          calc(100% - 20px) 50%,
+          calc(100% - 13px) 50%,
+          0 0;
+        background-size:
+          7px 7px,
+          7px 7px,
+          100% 100%;
+        background-repeat: no-repeat;
+        padding-right: 42px;
       }
 
       textarea {
@@ -585,7 +606,7 @@
             <p class="date" id="todayLabel"></p>
           </div>
         </div>
-        <button class="secondary" type="button" id="resetDemoButton" aria-label="Recarregar plano base">
+        <button class="secondary" type="button" id="resetDemoButton" aria-label="Limpar dados locais">
           <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
             <path d="M3 12a9 9 0 0 1 15-6.7L21 8M21 3v5h-5M21 12a9 9 0 0 1-15 6.7L3 16M3 21v-5h5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
           </svg>
@@ -599,6 +620,17 @@
             <h2 id="nextWorkoutTitle">Proximo treino</h2>
           </div>
           <button class="primary wide" type="button" id="startNextButton">Iniciar treino</button>
+        </div>
+
+        <div class="panel">
+          <div class="panel-title">
+            <h2>Importar plano</h2>
+            <span class="pill">JSON</span>
+          </div>
+          <div class="import-box">
+            <input type="file" id="dashboardImportFile" accept="application/json,.json" />
+            <button class="primary" type="button" id="dashboardImportButton">Importar JSON</button>
+          </div>
         </div>
 
         <div class="grid">
@@ -813,7 +845,8 @@
     <div class="toast" id="toast"></div>
 
     <script>
-      const STORAGE_KEY = "running-coach-static-v1";
+      const STORAGE_KEY = "running-coach-static-v2";
+      const emptyPlan = { id: "empty", name: "", weeks: [] };
 
       const demoPlan = {
         id: "10k-sub60-12-weeks",
@@ -1331,7 +1364,7 @@
       };
 
       const state = loadState();
-      let selectedWorkoutId = findNextWorkout()?.id || demoPlan.weeks[0].workouts[0].id;
+      let selectedWorkoutId = findNextWorkout()?.id || null;
       let activeSegmentIndex = 0;
       let elapsedInSegment = 0;
       let intervalId = null;
@@ -1339,17 +1372,17 @@
       function loadState() {
         const stored = localStorage.getItem(STORAGE_KEY);
         if (!stored) {
-          return { plan: demoPlan, results: [] };
+          return { plan: emptyPlan, results: [] };
         }
 
         try {
           const parsed = JSON.parse(stored);
           return {
-            plan: parsed.plan || demoPlan,
+            plan: parsed.plan || emptyPlan,
             results: Array.isArray(parsed.results) ? parsed.results : []
           };
         } catch {
-          return { plan: demoPlan, results: [] };
+          return { plan: emptyPlan, results: [] };
         }
       }
 
@@ -1358,8 +1391,8 @@
       }
 
       function allWorkouts() {
-        return state.plan.weeks.flatMap((week) =>
-          week.workouts.map((workout) => ({ ...workout, weekTitle: week.title }))
+        return (state.plan.weeks || []).flatMap((week) =>
+          (week.workouts || []).map((workout) => ({ ...workout, weekTitle: week.title }))
         );
       }
 
@@ -1464,8 +1497,8 @@
         const totalKm = state.results.reduce((sum, result) => sum + Number(result.distanceKm || 0), 0);
         const progress = workouts.length ? Math.round((done / workouts.length) * 100) : 0;
 
-        document.getElementById("activePlanLabel").textContent = state.plan.name || "Plano ativo";
-        document.getElementById("nextWorkoutTitle").textContent = next ? next.title : "Importe um plano";
+        document.getElementById("activePlanLabel").textContent = state.plan.name || "Nenhum plano importado";
+        document.getElementById("nextWorkoutTitle").textContent = next ? next.title : "Importe seu plano";
         document.getElementById("planProgress").textContent = `${progress}%`;
         document.getElementById("doneCount").textContent = `${done}/${workouts.length}`;
         document.getElementById("totalKm").textContent = totalKm.toFixed(1);
@@ -1492,6 +1525,11 @@
         const list = document.getElementById("weekList");
         list.innerHTML = "";
         document.getElementById("planCount").textContent = `${allWorkouts().length} treinos`;
+
+        if (!allWorkouts().length) {
+          list.innerHTML = '<div class="empty">Importe um plano JSON na tela inicial para visualizar as semanas.</div>';
+          return;
+        }
 
         state.plan.weeks.forEach((week) => {
           const title = document.createElement("div");
@@ -1814,8 +1852,7 @@
         showTab("history");
       });
 
-      document.getElementById("importButton").addEventListener("click", async () => {
-        const file = document.getElementById("importFile").files[0];
+      async function importPlanFromFile(file) {
         if (!file) {
           showToast("Escolha um arquivo JSON");
           return;
@@ -1832,6 +1869,14 @@
         } catch (error) {
           showToast(error.message || "JSON invalido");
         }
+      }
+
+      document.getElementById("dashboardImportButton").addEventListener("click", () => {
+        importPlanFromFile(document.getElementById("dashboardImportFile").files[0]);
+      });
+
+      document.getElementById("importButton").addEventListener("click", () => {
+        importPlanFromFile(document.getElementById("importFile").files[0]);
       });
 
       document.getElementById("exportButton").addEventListener("click", () => {
@@ -1847,13 +1892,13 @@
       });
 
       document.getElementById("resetDemoButton").addEventListener("click", () => {
-        if (!confirm("Recarregar o plano base e apagar registros locais?")) return;
+        if (!confirm("Limpar plano e registros salvos neste navegador?")) return;
         stopTimer();
-        state.plan = demoPlan;
+        state.plan = emptyPlan;
         state.results = [];
         saveState();
         selectWorkout(findNextWorkout()?.id);
-        showToast("Plano base restaurado");
+        showToast("Dados locais limpos");
         showTab("dashboard");
       });
 

@@ -567,6 +567,42 @@
         resize: vertical;
       }
 
+      .scale-control {
+        display: grid;
+        gap: 8px;
+      }
+
+      .scale-options {
+        display: grid;
+        grid-template-columns: repeat(var(--scale-count), minmax(0, 1fr));
+        gap: 4px;
+        padding: 4px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: #0d1118;
+      }
+
+      .scale-option {
+        min-width: 0;
+        min-height: 44px;
+        border-radius: 6px;
+        background: transparent;
+        color: var(--muted);
+        font-weight: 900;
+      }
+
+      .scale-option.active {
+        background: var(--orange);
+        color: #091018;
+      }
+
+      .scale-caption {
+        min-height: 18px;
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 700;
+      }
+
       .export-preview {
         min-height: 180px;
         font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
@@ -577,6 +613,24 @@
       .import-box {
         display: grid;
         gap: 10px;
+      }
+
+      .import-status {
+        display: grid;
+        gap: 10px;
+      }
+
+      .import-status strong {
+        display: block;
+        font-size: 18px;
+      }
+
+      .import-status.success strong {
+        color: var(--green);
+      }
+
+      .import-status.error strong {
+        color: var(--red);
       }
 
       .hidden {
@@ -659,19 +713,24 @@
         <div class="hero">
           <div>
             <p id="activePlanLabel">Plano ativo</p>
-            <h2 id="nextWorkoutTitle">Proximo treino</h2>
+            <h2 id="nextWorkoutTitle">Próximo treino</h2>
           </div>
           <button class="primary wide" type="button" id="startNextButton">Iniciar treino</button>
         </div>
 
-        <div class="panel">
+        <div class="panel" id="dashboardImportPanel">
           <div class="panel-title">
             <h2>Importar plano</h2>
             <span class="pill">JSON</span>
           </div>
-          <div class="import-box">
+          <div class="import-box" id="dashboardImportControls">
             <input type="file" id="dashboardImportFile" accept="application/json,.json" />
             <button class="primary" type="button" id="dashboardImportButton">Importar JSON</button>
+          </div>
+          <div class="import-status hidden" id="dashboardImportStatus">
+            <strong id="dashboardImportStatusTitle"></strong>
+            <p class="muted" id="dashboardImportStatusMessage"></p>
+            <button class="secondary" type="button" id="dashboardImportRetryButton">Importar outro JSON</button>
           </div>
         </div>
 
@@ -689,18 +748,11 @@
             <div class="value" id="totalKm">0</div>
           </div>
           <div class="metric">
-            <div class="label">Sequencia</div>
+            <div class="label">Sequência</div>
             <div class="value" id="streakCount">0</div>
           </div>
         </div>
 
-        <div class="panel">
-          <div class="panel-title">
-            <h2>Proxima corrida</h2>
-            <span class="pill current" id="nextWorkoutMeta">Hoje</span>
-          </div>
-          <div class="stack" id="nextWorkoutSegments"></div>
-        </div>
       </section>
 
       <section class="section" id="plan">
@@ -712,7 +764,7 @@
       </section>
 
       <section class="section" id="workout">
-        <div class="panel workout-stage">
+        <div class="panel workout-stage" id="runnerPanel">
           <div>
             <div class="card-row">
               <span class="pill current" id="runnerWorkoutLabel">Treino</span>
@@ -762,7 +814,7 @@
           </div>
           <div class="big-controls">
             <button class="secondary" type="button" id="prevSegmentButton">Voltar</button>
-            <button class="secondary" type="button" id="nextSegmentButton">Avancar</button>
+            <button class="secondary" type="button" id="nextSegmentButton">Avançar</button>
             <button class="primary" type="button" id="toggleRunButton">Iniciar</button>
             <button class="danger" type="button" id="finishRunButton">Finalizar</button>
           </div>
@@ -770,7 +822,7 @@
 
         <div class="panel" id="runnerTimelinePanel">
           <div class="panel-title">
-            <h2>Sequencia do treino</h2>
+            <h2>Sequência do treino</h2>
             <span class="pill current hidden" id="runnerRoundLabel">Round 0 de 0</span>
           </div>
           <div class="sequence-list" id="runnerSequenceList"></div>
@@ -779,11 +831,12 @@
         <div class="panel hidden" id="resultPanel">
           <div class="panel-title">
             <h2>Registrar treino</h2>
+            <button class="secondary" type="button" id="resultBackButton">Voltar ao treino</button>
           </div>
           <form class="form" id="resultForm">
             <div class="form-row">
               <label class="field">
-                <span>Distancia (km)</span>
+                <span>Distância (km)</span>
                 <input id="distanceInput" inputmode="decimal" required />
               </label>
               <label class="field">
@@ -791,60 +844,34 @@
                 <input id="durationInput" inputmode="decimal" required />
               </label>
             </div>
-            <div class="form-row">
-              <label class="field">
-                <span>Esforco</span>
-                <select id="effortInput">
-                  <option value="1">1 leve</option>
-                  <option value="2">2</option>
-                  <option value="3">3</option>
-                  <option value="4">4</option>
-                  <option value="5" selected>5 moderado</option>
-                  <option value="6">6</option>
-                  <option value="7">7 forte</option>
-                  <option value="8">8</option>
-                  <option value="9">9</option>
-                  <option value="10">10 maximo</option>
-                </select>
-              </label>
-              <label class="field">
-                <span>Dor depois</span>
-                <select id="painAfterInput">
-                  <option value="0">0 nenhuma</option>
-                  <option value="1">1</option>
-                  <option value="2">2</option>
-                  <option value="3">3</option>
-                  <option value="4">4</option>
-                  <option value="5">5 alta</option>
-                </select>
-              </label>
+            <div class="scale-control" data-scale="effortInput" data-default="5" data-labels='{"1":"leve","5":"moderado","7":"forte","10":"máximo"}'>
+              <span>Esforço</span>
+              <input type="hidden" id="effortInput" value="5" />
+              <div class="scale-options" style="--scale-count: 10" aria-label="Esforço percebido"></div>
+              <div class="scale-caption"></div>
             </div>
             <div class="form-row">
-              <label class="field">
+              <div class="field scale-control" data-scale="painBeforeInput" data-default="0" data-labels='{"0":"nenhuma","5":"alta"}'>
                 <span>Dor antes</span>
-                <select id="painBeforeInput">
-                  <option value="0">0 nenhuma</option>
-                  <option value="1">1</option>
-                  <option value="2">2</option>
-                  <option value="3">3</option>
-                  <option value="4">4</option>
-                  <option value="5">5 alta</option>
-                </select>
-              </label>
-              <label class="field">
+                <input type="hidden" id="painBeforeInput" value="0" />
+                <div class="scale-options" style="--scale-count: 6" aria-label="Dor antes"></div>
+                <div class="scale-caption"></div>
+              </div>
+              <div class="field scale-control" data-scale="painDuringInput" data-default="0" data-labels='{"0":"nenhuma","5":"alta"}'>
                 <span>Dor durante</span>
-                <select id="painDuringInput">
-                  <option value="0">0 nenhuma</option>
-                  <option value="1">1</option>
-                  <option value="2">2</option>
-                  <option value="3">3</option>
-                  <option value="4">4</option>
-                  <option value="5">5 alta</option>
-                </select>
-              </label>
+                <input type="hidden" id="painDuringInput" value="0" />
+                <div class="scale-options" style="--scale-count: 6" aria-label="Dor durante"></div>
+                <div class="scale-caption"></div>
+              </div>
+            </div>
+            <div class="scale-control" data-scale="painAfterInput" data-default="0" data-labels='{"0":"nenhuma","5":"alta"}'>
+              <span>Dor depois</span>
+              <input type="hidden" id="painAfterInput" value="0" />
+              <div class="scale-options" style="--scale-count: 6" aria-label="Dor depois"></div>
+              <div class="scale-caption"></div>
             </div>
             <label class="field">
-              <span>Observacoes</span>
+              <span>Observações</span>
               <textarea id="notesInput" placeholder="Esteira, rua, sensacoes, ajustes..."></textarea>
             </label>
             <button class="primary wide" type="submit">Salvar resultado</button>
@@ -854,19 +881,19 @@
 
       <section class="section" id="history">
         <div class="panel-title">
-          <h2>Historico</h2>
+          <h2>Histórico</h2>
           <span class="pill" id="historySummary">0 registros</span>
         </div>
         <div class="stack" id="historyList"></div>
 
         <div class="panel">
           <div class="panel-title">
-            <h2>Exportar para analise</h2>
+            <h2>Exportar para análise</h2>
             <span class="pill">Chat</span>
           </div>
           <div class="import-box">
             <button class="primary" type="button" id="copyHistoryButton">Copiar resumo</button>
-            <button class="secondary" type="button" id="exportHistoryButton">Baixar historico JSON</button>
+            <button class="secondary" type="button" id="exportHistoryButton">Baixar histórico JSON</button>
             <textarea class="export-preview" id="historyExportText" readonly></textarea>
           </div>
         </div>
@@ -908,7 +935,7 @@
       </button>
       <button class="tab" type="button" data-tab="history">
         <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 19V5M4 19h16M8 16v-5M12 16V8M16 16v-8" stroke="currentColor" stroke-width="2" stroke-linecap="round" /></svg>
-        Historico
+        Histórico
       </button>
       <button class="tab" type="button" data-tab="data">
         <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3v12M8 7l4-4 4 4M5 15v5h14v-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
@@ -932,7 +959,7 @@
             workouts: [
               {
                 id: "w1-t1",
-                day: "Terca",
+                day: "Terça",
                 title: "Esteira leve",
                 target: "Base aerobica",
                 segments: [
@@ -959,7 +986,7 @@
                 title: "Longo curto",
                 target: "Volume",
                 segments: [
-                  { name: "Aquecimento", minutes: 8, speedKmh: 7.0, note: "Comecar facil" },
+                  { name: "Aquecimento", minutes: 8, speedKmh: 7.0, note: "Comecar fácil" },
                   { name: "Corrida leve", minutes: 32, speedKmh: 8.0, note: "Pode ser rua ou esteira" }
                 ]
               }
@@ -971,7 +998,7 @@
             workouts: [
               {
                 id: "w2-t1",
-                day: "Terca",
+                day: "Terça",
                 title: "Esteira progressiva",
                 target: "Controle de esforco",
                 segments: [
@@ -989,9 +1016,9 @@
                 segments: [
                   { name: "Aquecimento", minutes: 7, speedKmh: 7.0, note: "Preparar pernas" },
                   { name: "Tiro", minutes: 2, speedKmh: 10.5, note: "Forte" },
-                  { name: "Recuperacao", minutes: 2, speedKmh: 7.5, note: "Baixar batimento" },
+                  { name: "Recuperação", minutes: 2, speedKmh: 7.5, note: "Baixar batimento" },
                   { name: "Tiro", minutes: 2, speedKmh: 10.5, note: "Repetir postura" },
-                  { name: "Recuperacao", minutes: 2, speedKmh: 7.5, note: "Controlado" },
+                  { name: "Recuperação", minutes: 2, speedKmh: 7.5, note: "Controlado" },
                   { name: "Tiro", minutes: 2, speedKmh: 10.5, note: "Ultimo forte" },
                   { name: "Desaquecimento", minutes: 8, speedKmh: 6.5, note: "Soltar" }
                 ]
@@ -1014,7 +1041,7 @@
             workouts: [
               {
                 id: "w3-t1",
-                day: "Terca",
+                day: "Terça",
                 title: "Base com final firme",
                 target: "Fechar melhor que comecou",
                 segments: [
@@ -1032,7 +1059,7 @@
                 segments: [
                   { name: "Aquecimento", minutes: 7, speedKmh: 7.0, note: "Sem pressa" },
                   { name: "Ritmo", minutes: 8, speedKmh: 10.0, note: "Pace alvo" },
-                  { name: "Recuperacao", minutes: 4, speedKmh: 8.0, note: "Controlar" },
+                  { name: "Recuperação", minutes: 4, speedKmh: 8.0, note: "Controlar" },
                   { name: "Ritmo", minutes: 8, speedKmh: 10.0, note: "Repetir" },
                   { name: "Desaquecimento", minutes: 7, speedKmh: 6.5, note: "Soltar" }
                 ]
@@ -1056,11 +1083,11 @@
             workouts: [
               {
                 id: "w4-t1",
-                day: "Terca",
+                day: "Terça",
                 title: "Regenerativo",
                 target: "Absorver carga",
                 segments: [
-                  { name: "Aquecimento", minutes: 5, speedKmh: 6.5, note: "Muito facil" },
+                  { name: "Aquecimento", minutes: 5, speedKmh: 6.5, note: "Muito fácil" },
                   { name: "Corrida leve", minutes: 24, speedKmh: 8.0, note: "Confortavel" },
                   { name: "Desaquecimento", minutes: 5, speedKmh: 6.5, note: "Soltar" }
                 ]
@@ -1098,7 +1125,7 @@
             workouts: [
               {
                 id: "w5-t1",
-                day: "Terca",
+                day: "Terça",
                 title: "Esteira limite 40",
                 target: "Base forte",
                 segments: [
@@ -1111,14 +1138,14 @@
               {
                 id: "w5-t2",
                 day: "Quinta",
-                title: "Tiros medios",
+                title: "Tiros médios",
                 target: "Resistencia de velocidade",
                 segments: [
                   { name: "Aquecimento", minutes: 7, speedKmh: 7.0, note: "Preparar" },
                   { name: "Tiro", minutes: 4, speedKmh: 10.5, note: "Forte controlado" },
-                  { name: "Recuperacao", minutes: 3, speedKmh: 7.5, note: "Recuperar" },
+                  { name: "Recuperação", minutes: 3, speedKmh: 7.5, note: "Recuperar" },
                   { name: "Tiro", minutes: 4, speedKmh: 10.5, note: "Manter forma" },
-                  { name: "Recuperacao", minutes: 3, speedKmh: 7.5, note: "Respirar" },
+                  { name: "Recuperação", minutes: 3, speedKmh: 7.5, note: "Respirar" },
                   { name: "Tiro", minutes: 4, speedKmh: 10.5, note: "Ultimo" },
                   { name: "Desaquecimento", minutes: 7, speedKmh: 6.5, note: "Soltar" }
                 ]
@@ -1141,7 +1168,7 @@
             workouts: [
               {
                 id: "w6-t1",
-                day: "Terca",
+                day: "Terça",
                 title: "Progressivo 40",
                 target: "Economia de corrida",
                 segments: [
@@ -1160,7 +1187,7 @@
                 segments: [
                   { name: "Aquecimento", minutes: 7, speedKmh: 7.0, note: "Preparar" },
                   { name: "Ritmo", minutes: 10, speedKmh: 10.0, note: "Pace alvo" },
-                  { name: "Recuperacao", minutes: 4, speedKmh: 8.0, note: "Controlar" },
+                  { name: "Recuperação", minutes: 4, speedKmh: 8.0, note: "Controlar" },
                   { name: "Ritmo", minutes: 10, speedKmh: 10.0, note: "Repetir" },
                   { name: "Desaquecimento", minutes: 7, speedKmh: 6.5, note: "Soltar" }
                 ]
@@ -1183,8 +1210,8 @@
             workouts: [
               {
                 id: "w7-t1",
-                day: "Terca",
-                title: "Recuperacao ativa",
+                day: "Terça",
+                title: "Recuperação ativa",
                 target: "Reduzir impacto do CrossFit",
                 segments: [
                   { name: "Aquecimento", minutes: 5, speedKmh: 6.5, note: "Muito leve" },
@@ -1200,13 +1227,13 @@
                 segments: [
                   { name: "Aquecimento", minutes: 7, speedKmh: 7.0, note: "Preparar" },
                   { name: "Tiro", minutes: 3, speedKmh: 11.0, note: "Forte" },
-                  { name: "Recuperacao", minutes: 2, speedKmh: 7.5, note: "Recuperar" },
+                  { name: "Recuperação", minutes: 2, speedKmh: 7.5, note: "Recuperar" },
                   { name: "Tiro", minutes: 3, speedKmh: 11.0, note: "Forte" },
-                  { name: "Recuperacao", minutes: 2, speedKmh: 7.5, note: "Recuperar" },
+                  { name: "Recuperação", minutes: 2, speedKmh: 7.5, note: "Recuperar" },
                   { name: "Tiro", minutes: 3, speedKmh: 11.0, note: "Forte" },
-                  { name: "Recuperacao", minutes: 2, speedKmh: 7.5, note: "Recuperar" },
+                  { name: "Recuperação", minutes: 2, speedKmh: 7.5, note: "Recuperar" },
                   { name: "Tiro", minutes: 3, speedKmh: 11.0, note: "Forte" },
-                  { name: "Recuperacao", minutes: 2, speedKmh: 7.5, note: "Recuperar" },
+                  { name: "Recuperação", minutes: 2, speedKmh: 7.5, note: "Recuperar" },
                   { name: "Tiro", minutes: 3, speedKmh: 11.0, note: "Ultimo" },
                   { name: "Desaquecimento", minutes: 6, speedKmh: 6.5, note: "Soltar" }
                 ]
@@ -1229,9 +1256,9 @@
             workouts: [
               {
                 id: "w8-t1",
-                day: "Terca",
+                day: "Terça",
                 title: "Esteira 40 forte",
-                target: "Confianca no pace",
+                target: "Confiança no pace",
                 segments: [
                   { name: "Aquecimento", minutes: 5, speedKmh: 7.0, note: "Facil" },
                   { name: "Leve", minutes: 15, speedKmh: 8.5, note: "Base" },
@@ -1269,15 +1296,15 @@
             workouts: [
               {
                 id: "w9-t1",
-                day: "Terca",
+                day: "Terça",
                 title: "Leve com strides",
                 target: "Soltar velocidade",
                 segments: [
                   { name: "Aquecimento", minutes: 5, speedKmh: 7.0, note: "Facil" },
                   { name: "Leve", minutes: 20, speedKmh: 8.5, note: "Base" },
-                  { name: "Aceleracao", minutes: 1, speedKmh: 11.0, note: "Rapido sem sprint" },
+                  { name: "Aceleração", minutes: 1, speedKmh: 11.0, note: "Rapido sem sprint" },
                   { name: "Leve", minutes: 2, speedKmh: 7.5, note: "Recuperar" },
-                  { name: "Aceleracao", minutes: 1, speedKmh: 11.0, note: "Solto" },
+                  { name: "Aceleração", minutes: 1, speedKmh: 11.0, note: "Solto" },
                   { name: "Leve", minutes: 2, speedKmh: 7.5, note: "Recuperar" },
                   { name: "Desaquecimento", minutes: 5, speedKmh: 6.5, note: "Soltar" }
                 ]
@@ -1290,9 +1317,9 @@
                 segments: [
                   { name: "Aquecimento", minutes: 7, speedKmh: 7.0, note: "Preparar" },
                   { name: "Ritmo", minutes: 8, speedKmh: 10.0, note: "Pace alvo" },
-                  { name: "Recuperacao", minutes: 3, speedKmh: 8.0, note: "Controlar" },
+                  { name: "Recuperação", minutes: 3, speedKmh: 8.0, note: "Controlar" },
                   { name: "Ritmo", minutes: 8, speedKmh: 10.0, note: "Pace alvo" },
-                  { name: "Recuperacao", minutes: 3, speedKmh: 8.0, note: "Controlar" },
+                  { name: "Recuperação", minutes: 3, speedKmh: 8.0, note: "Controlar" },
                   { name: "Ritmo", minutes: 8, speedKmh: 10.0, note: "Ultimo bloco" },
                   { name: "Desaquecimento", minutes: 5, speedKmh: 6.5, note: "Soltar" }
                 ]
@@ -1316,7 +1343,7 @@
             workouts: [
               {
                 id: "w10-t1",
-                day: "Terca",
+                day: "Terça",
                 title: "Esteira controlada",
                 target: "Manter sem acumular fadiga",
                 segments: [
@@ -1334,9 +1361,9 @@
                 segments: [
                   { name: "Aquecimento", minutes: 8, speedKmh: 7.0, note: "Preparar" },
                   { name: "Tiro", minutes: 6, speedKmh: 10.5, note: "Forte controlado" },
-                  { name: "Recuperacao", minutes: 3, speedKmh: 8.0, note: "Recuperar" },
+                  { name: "Recuperação", minutes: 3, speedKmh: 8.0, note: "Recuperar" },
                   { name: "Tiro", minutes: 6, speedKmh: 10.5, note: "Manter" },
-                  { name: "Recuperacao", minutes: 3, speedKmh: 8.0, note: "Recuperar" },
+                  { name: "Recuperação", minutes: 3, speedKmh: 8.0, note: "Recuperar" },
                   { name: "Tiro", minutes: 6, speedKmh: 10.5, note: "Ultimo" },
                   { name: "Desaquecimento", minutes: 7, speedKmh: 6.5, note: "Soltar" }
                 ]
@@ -1360,8 +1387,8 @@
             workouts: [
               {
                 id: "w11-t1",
-                day: "Terca",
-                title: "Reducao leve",
+                day: "Terça",
+                title: "Redução leve",
                 target: "Chegar inteiro",
                 segments: [
                   { name: "Aquecimento", minutes: 5, speedKmh: 7.0, note: "Facil" },
@@ -1377,7 +1404,7 @@
                 target: "Afinar ritmo",
                 segments: [
                   { name: "Aquecimento", minutes: 8, speedKmh: 7.0, note: "Preparar" },
-                  { name: "Ritmo", minutes: 15, speedKmh: 10.0, note: "Pace alvo facil" },
+                  { name: "Ritmo", minutes: 15, speedKmh: 10.0, note: "Pace alvo fácil" },
                   { name: "Desaquecimento", minutes: 8, speedKmh: 6.5, note: "Sem fadigar" }
                 ]
               },
@@ -1399,8 +1426,8 @@
             workouts: [
               {
                 id: "w12-t1",
-                day: "Terca",
-                title: "Ativacao",
+                day: "Terça",
+                title: "Ativação",
                 target: "Manter pernas vivas",
                 segments: [
                   { name: "Aquecimento", minutes: 5, speedKmh: 7.0, note: "Facil" },
@@ -1412,12 +1439,12 @@
               {
                 id: "w12-t2",
                 day: "Quinta",
-                title: "Soltura pre-teste",
+                title: "Soltura pré-teste",
                 target: "Chegar descansado",
                 segments: [
-                  { name: "Aquecimento", minutes: 5, speedKmh: 6.5, note: "Muito facil" },
+                  { name: "Aquecimento", minutes: 5, speedKmh: 6.5, note: "Muito fácil" },
                   { name: "Corrida leve", minutes: 20, speedKmh: 8.0, note: "Sem forcar" },
-                  { name: "Aceleracao", minutes: 1, speedKmh: 10.5, note: "Solta" },
+                  { name: "Aceleração", minutes: 1, speedKmh: 10.5, note: "Solta" },
                   { name: "Desaquecimento", minutes: 5, speedKmh: 6.5, note: "Encerrar bem" }
                 ]
               },
@@ -1745,6 +1772,22 @@
         window.setTimeout(() => toast.classList.remove("show"), 2200);
       }
 
+      function showDashboardImportStatus(type, title, message) {
+        const controls = document.getElementById("dashboardImportControls");
+        const status = document.getElementById("dashboardImportStatus");
+        controls.classList.add("hidden");
+        status.classList.remove("hidden", "success", "error");
+        status.classList.add(type);
+        document.getElementById("dashboardImportStatusTitle").textContent = title;
+        document.getElementById("dashboardImportStatusMessage").textContent = message;
+      }
+
+      function resetDashboardImportStatus() {
+        document.getElementById("dashboardImportControls").classList.remove("hidden");
+        document.getElementById("dashboardImportStatus").classList.add("hidden");
+        document.getElementById("dashboardImportFile").value = "";
+      }
+
       function applyRunnerMode() {
         document.querySelectorAll("[data-runner-mode]").forEach((button) => {
           button.classList.toggle("active", button.dataset.runnerMode === runnerMode);
@@ -1760,6 +1803,50 @@
         applyRunnerMode();
       }
 
+      function setupScaleControls() {
+        document.querySelectorAll("[data-scale]").forEach((control) => {
+          const input = document.getElementById(control.dataset.scale);
+          const options = control.querySelector(".scale-options");
+          const caption = control.querySelector(".scale-caption");
+          const labels = JSON.parse(control.dataset.labels || "{}");
+          const max = control.dataset.scale === "effortInput" ? 10 : 5;
+          const min = control.dataset.scale === "effortInput" ? 1 : 0;
+
+          const selectValue = (value) => {
+            input.value = String(value);
+            options.querySelectorAll(".scale-option").forEach((button) => {
+              button.classList.toggle("active", button.dataset.value === String(value));
+            });
+            caption.textContent = labels[String(value)] ? `${value} ${labels[String(value)]}` : String(value);
+          };
+
+          options.innerHTML = "";
+          for (let value = min; value <= max; value += 1) {
+            const button = document.createElement("button");
+            button.type = "button";
+            button.className = "scale-option";
+            button.dataset.value = String(value);
+            button.textContent = String(value);
+            button.addEventListener("click", () => selectValue(value));
+            options.appendChild(button);
+          }
+
+          selectValue(Number(control.dataset.default));
+        });
+      }
+
+      function showWorkoutExecutionView() {
+        document.getElementById("runnerPanel").classList.remove("hidden");
+        document.getElementById("runnerTimelinePanel").classList.remove("hidden");
+        document.getElementById("resultPanel").classList.add("hidden");
+      }
+
+      function showWorkoutResultView() {
+        document.getElementById("runnerPanel").classList.add("hidden");
+        document.getElementById("runnerTimelinePanel").classList.add("hidden");
+        document.getElementById("resultPanel").classList.remove("hidden");
+      }
+
       function renderDashboard() {
         const workouts = allWorkouts();
         const done = state.results.length;
@@ -1773,22 +1860,7 @@
         document.getElementById("doneCount").textContent = `${done}/${workouts.length}`;
         document.getElementById("totalKm").textContent = totalKm.toFixed(1);
         document.getElementById("streakCount").textContent = String(calculateStreak());
-        document.getElementById("nextWorkoutMeta").textContent = next ? `${next.weekTitle} - ${next.day}` : "--";
         document.getElementById("startNextButton").disabled = !next;
-
-        const list = document.getElementById("nextWorkoutSegments");
-        list.innerHTML = "";
-        if (!next) {
-          list.innerHTML = '<div class="empty">Nenhum treino disponivel.</div>';
-          return;
-        }
-
-        next.segments.forEach((segment) => {
-          const item = document.createElement("div");
-          item.className = "card-row";
-          item.innerHTML = `<span>${segment.name}</span><span class="pill">${segment.minutes} min - ${segment.speedKmh} km/h</span>`;
-          list.appendChild(item);
-        });
       }
 
       function renderPlan() {
@@ -1948,7 +2020,7 @@
                   workouts: [
                     {
                       id: "s1-t1",
-                      day: "Terca",
+                      day: "Terça",
                       title: "Esteira leve",
                       target: "Base",
                       targetDistanceKm: 5,
@@ -1984,7 +2056,7 @@
         activeSegmentIndex = 0;
         elapsedInSegment = 0;
         clearActiveRun();
-        document.getElementById("resultPanel").classList.add("hidden");
+        showWorkoutExecutionView();
         renderRunner();
       }
 
@@ -2025,8 +2097,9 @@
         stopTimer({ persistPause: false });
         clearActiveRun();
         const workout = getWorkout(selectedWorkoutId);
-        document.getElementById("resultPanel").classList.remove("hidden");
+        showWorkoutResultView();
         if (workout) {
+          setupScaleControls();
           document.getElementById("durationInput").value = String(totalPlannedMinutes(workout));
           const estimatedKm = workout.segments.reduce((sum, segment) => sum + (Number(segment.speedKmh || 0) * Number(segment.minutes || 0)) / 60, 0);
           document.getElementById("distanceInput").value = estimatedKm.toFixed(2);
@@ -2103,18 +2176,18 @@
       function buildHistoryAnalysisText() {
         const payload = buildHistoryAnalysisPayload();
         const lines = [
-          "# Historico Running Coach",
+          "# Histórico Running Coach",
           "",
           `Plano: ${payload.plan.name || "sem plano importado"}`,
           `Exportado em: ${new Date(payload.exportedAt).toLocaleString("pt-BR")}`,
           "",
           "## Resumo",
-          `- Treinos concluidos: ${payload.summary.completedWorkouts}/${payload.plan.totalWorkouts}`,
-          `- Distancia total: ${payload.summary.totalDistanceKm} km`,
+          `- Treinos concluídos: ${payload.summary.completedWorkouts}/${payload.plan.totalWorkouts}`,
+          `- Distância total: ${payload.summary.totalDistanceKm} km`,
           `- Tempo total: ${payload.summary.totalDurationMin} min`,
-          `- Pace medio: ${formatPaceDecimal(payload.summary.averagePaceMinKm)}`,
-          `- Esforco medio: ${payload.summary.averageEffort}/10`,
-          `- Sequencia registrada: ${payload.summary.streakDays} dias`,
+          `- Pace médio: ${formatPaceDecimal(payload.summary.averagePaceMinKm)}`,
+          `- Esforço médio: ${payload.summary.averageEffort}/10`,
+          `- Sequência registrada: ${payload.summary.streakDays} dias`,
           "",
           "## Treinos"
         ];
@@ -2131,9 +2204,9 @@
             `- Semana/dia: ${item.week || "--"} / ${item.day || "--"}`,
             `- Objetivo: ${item.target || "--"}`,
             `- Resultado: ${item.distanceKm.toFixed(2)} km em ${item.durationMin.toFixed(1)} min (${formatPaceDecimal(item.averagePaceMinKm)})`,
-            `- Esforco percebido: ${item.effort}/10`,
+            `- Esforço percebido: ${item.effort}/10`,
             `- Dor: antes ${item.painBefore}/5, durante ${item.painDuring}/5, depois ${item.painAfter}/5`,
-            `- Observacoes: ${item.notes || "--"}`
+            `- Observações: ${item.notes || "--"}`
           );
         });
 
@@ -2247,6 +2320,11 @@
 
       document.getElementById("finishRunButton").addEventListener("click", openResultForm);
 
+      document.getElementById("resultBackButton").addEventListener("click", () => {
+        showWorkoutExecutionView();
+        renderRunner();
+      });
+
       document.getElementById("resultForm").addEventListener("submit", (event) => {
         event.preventDefault();
         const workout = getWorkout(selectedWorkoutId);
@@ -2268,13 +2346,14 @@
         state.results = state.results.filter((item) => item.workoutId !== workout.id);
         state.results.push(result);
         saveState();
-        document.getElementById("resultPanel").classList.add("hidden");
+        showWorkoutExecutionView();
         showToast("Resultado salvo");
         showTab("history");
       });
 
       async function importPlanFromFile(file) {
         if (!file) {
+          showDashboardImportStatus("error", "Nenhum arquivo selecionado", "Escolha um arquivo JSON para importar o plano.");
           showToast("Escolha um arquivo JSON");
           return;
         }
@@ -2282,20 +2361,25 @@
         try {
           const imported = JSON.parse(await file.text());
           state.plan = validateImportedPlan(imported);
-            state.results = Array.isArray(imported.results) ? imported.results : [];
+          state.results = Array.isArray(imported.results) ? imported.results : [];
           state.activeRun = null;
           saveState();
           selectWorkout(findNextWorkout()?.id);
+          showDashboardImportStatus("success", "Plano importado", `${state.plan.name} foi carregado com ${allWorkouts().length} treinos.`);
           showToast("Plano importado");
           showTab("dashboard");
         } catch (error) {
-          showToast(error.message || "JSON invalido");
+          const message = error.message || "JSON inválido";
+          showDashboardImportStatus("error", "Erro na importação", message);
+          showToast(message);
         }
       }
 
       document.getElementById("dashboardImportButton").addEventListener("click", () => {
         importPlanFromFile(document.getElementById("dashboardImportFile").files[0]);
       });
+
+      document.getElementById("dashboardImportRetryButton").addEventListener("click", resetDashboardImportStatus);
 
       document.getElementById("importButton").addEventListener("click", () => {
         importPlanFromFile(document.getElementById("importFile").files[0]);
@@ -2320,7 +2404,7 @@
 
       document.getElementById("exportHistoryButton").addEventListener("click", () => {
         downloadJson(`running-coach-history-${new Date().toISOString().slice(0, 10)}.json`, buildHistoryAnalysisPayload());
-        showToast("Historico exportado");
+        showToast("Histórico exportado");
       });
 
       document.getElementById("resetDemoButton").addEventListener("click", () => {
@@ -2350,6 +2434,8 @@
       if (state.activeRun?.isRunning) {
         startTimer();
       }
+
+      setupScaleControls();
 
       if ("serviceWorker" in navigator && location.protocol !== "file:") {
         window.addEventListener("load", () => {

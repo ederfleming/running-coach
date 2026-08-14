@@ -1,22 +1,22 @@
 # Running Coach
 
-Aplicativo pessoal para acompanhar treinos de corrida de forma local-first, simples e usavel durante a corrida.
+Aplicativo pessoal para acompanhar treinos de corrida de forma local-first, simples e usável durante a corrida.
 
-Esta primeira versao foi implementada como um `index.html` estatico para ser facil de abrir, testar, compartilhar e publicar no GitHub Pages. Os dados ficam salvos localmente no navegador do aparelho via `localStorage`.
+Esta primeira versão foi implementada como um `index.html` estático para ser fácil de abrir, testar, compartilhar e públicar no GitHub Pages. Os dados ficam salvos localmente no navegador do aparelho via `localStorage`.
 
 ## Publicacao e privacidade
 
-O projeto pode ser publicado gratuitamente no GitHub Pages usando um repositorio publico.
+O projeto pode ser públicado gratuitamente no GitHub Pages usando um repositório público.
 
 Pontos importantes:
 
-- o codigo do app fica publico no GitHub;
-- plano, historico e resultados ficam salvos localmente no navegador, nao no repositorio;
-- nao versionar arquivos de backup, historico exportado ou planos pessoais sensiveis;
-- ao publicar mudancas, basta enviar `index.html`, `README.md`, `manifest.webmanifest`, `icon.svg` e `service-worker.js`;
-- repositorio privado com GitHub Pages pode exigir plano pago, dependendo da conta/organizacao.
+- o código do app fica público no GitHub;
+- plano, histórico e resultados ficam salvos localmente no navegador, não no repositório;
+- não versionar arquivos de backup, histórico exportado ou planos pessoais sensiveis;
+- ao públicar mudanças, basta enviar `index.html`, `README.md`, `manifest.webmanifest`, `icon.svg` e `service-worker.js`;
+- repositório privado com GitHub Pages pode exigir plano pago, dependendo da conta/organização.
 
-A URL publica esperada neste projeto e:
+A URL pública esperada neste projeto e:
 
 ```txt
 https://ederfleming.github.io/running-coach/
@@ -24,38 +24,38 @@ https://ederfleming.github.io/running-coach/
 
 ## Objetivo
 
-Permitir acompanhar um plano de corrida sem backend, login ou sincronizacao.
+Permitir acompanhar um plano de corrida sem backend, login ou sincronização.
 
 O app deve permitir:
 
 - visualizar o treino atual;
 - executar treinos guiados por segmentos;
-- registrar resultado pos-treino;
-- acompanhar historico;
+- registrar resultado pós-treino;
+- acompanhar histórico;
 - importar planos gerados pelo ChatGPT em JSON;
 - exportar backup JSON.
 
-## Escopo da versao HTML
+## Escopo da versão HTML
 
 Incluido:
 
-- dashboard com proximo treino, progresso, concluidos, km acumulados e sequencia;
+- dashboard com proximo treino, progresso, concluídos, km acumulados e sequencia;
 - plano por semanas;
-- status de treino planejado/concluido;
-- tela de execucao com cronometro, etapa atual, velocidade, pace e progresso;
-- alternancia entre modo Esteira e modo Rua na tela de treino;
-- no modo Esteira, exibicao de cronometro, velocidade e pace da etapa;
-- no modo Rua, exibicao de km alvo, faixa de pace e tempo estimado;
-- cronometro persistido por timestamp para recuperar tempo apos bloqueio/reabertura;
+- status de treino planejado/concluído;
+- tela de execução com cronômetro, etapa atual, velocidade, pace e progresso;
+- alternância entre modo Esteira e modo Rua na tela de treino;
+- no modo Esteira, exibição de cronômetro, velocidade e pace da etapa;
+- no modo Rua, exibição de km alvo, faixa de pace e tempo estimado;
+- cronômetro persistido por timestamp para recuperar tempo apos bloqueio/reabertura;
 - tentativa de manter a tela ligada durante o treino com Screen Wake Lock quando suportado;
-- controles de iniciar, pausar, continuar, voltar etapa, avancar etapa e finalizar;
-- formulario de resultado com distancia, tempo, esforco, dor antes/durante/depois e observacoes;
-- historico local;
+- controles de iniciar, pausar, continuar, voltar etapa, avançar etapa e finalizar;
+- formulario de resultado com distância, tempo, esforco, dor antes/durante/depois e observacoes;
+- histórico local;
 - importacao de JSON direto na tela inicial e na tela de dados;
 - exportacao de backup JSON;
 - estado inicial sem treinos cadastrados.
 
-Fora desta versao:
+Fora desta versão:
 
 - SQLite;
 - Expo/React Native;
@@ -63,23 +63,23 @@ Fora desta versao:
 - HealthKit;
 - Apple Watch;
 - notificacoes;
-- sincronizacao;
+- sincronização;
 - autenticacao;
-- graficos avancados.
+- graficos avançados.
 
 ## Limitacao importante
 
-Como esta versao e um HTML estatico, a persistencia depende do navegador onde o arquivo for aberto.
+Como esta versão e um HTML estático, a persistência depende do navegador onde o arquivo for aberto.
 
-No iPhone, abrir o arquivo diretamente pelo WhatsApp pode usar um visualizador temporario. Para nao perder dados, o caminho mais confiavel e:
+No iPhone, abrir o arquivo diretamente pelo WhatsApp pode usar um visualizador temporario. Para não perder dados, o caminho mais confiavel e:
 
 1. abrir o arquivo no Safari ou Chrome;
 2. usar sempre o mesmo navegador;
 3. exportar backup JSON com frequencia.
 
-Para persistencia mais robusta, a proxima evolucao recomendada e transformar em PWA hospedada em uma URL simples ou iniciar o app Expo com SQLite.
+Para persistência mais robusta, a proxima evolucao recomendada e transformar em PWA hospedada em uma URL simples ou iniciar o app Expo com SQLite.
 
-Durante a execucao do treino, o app salva o estado do cronometro usando data/hora real. Se o iPhone bloquear a tela ou suspender o JavaScript, ao voltar o app recalcula o tempo decorrido e avanca para a etapa correta. O app tambem tenta usar Screen Wake Lock para manter a tela ligada, mas o suporte depende do navegador/iOS e nao e garantido.
+Durante a execução do treino, o app salva o estado do cronômetro usando data/hora real. Se o iPhone bloquear a tela ou suspender o JavaScript, ao voltar o app recalcula o tempo decorrido e avança para a etapa correta. O app também tenta usar Screen Wake Lock para manter a tela ligada, mas o suporte depende do navegador/iOS e não e garantido.
 
 ## Modelo de dados atual
 
@@ -97,7 +97,7 @@ O backup exportado possui esta estrutura:
         "workouts": [
           {
             "id": "w1-t1",
-            "day": "Terca",
+            "day": "Terça",
             "title": "Esteira leve",
             "target": "Base aerobica",
             "segments": [
@@ -134,7 +134,7 @@ O backup exportado possui esta estrutura:
 
 O app aceita um JSON contendo `plan` ou diretamente o objeto do plano.
 
-Exemplo minimo:
+Exemplo mínimo:
 
 ```json
 {
@@ -148,7 +148,7 @@ Exemplo minimo:
         "workouts": [
           {
             "id": "s1-t1",
-            "day": "Terca",
+            "day": "Terça",
             "title": "Esteira leve",
             "target": "Base",
             "segments": [
@@ -170,11 +170,11 @@ Exemplo minimo:
 
 Campos opcionais por treino para corrida na rua:
 
-- `targetDistanceKm`: distancia alvo total do treino em km;
+- `targetDistanceKm`: distância alvo total do treino em km;
 - `paceRangeMinKm`: faixa de pace alvo no formato `["6:00", "6:30"]`;
 - alternativamente, pode usar `paceMinKm` e `paceMaxKm`.
 
-Quando esses campos existem, a tela de treino mostra km alvo, pace alvo e tempo estimado. Quando nao existem, o app calcula distancia e pace medio a partir dos segmentos com `minutes` e `speedKmh`.
+Quando esses campos existem, a tela de treino mostra km alvo, pace alvo e tempo estimado. Quando não existem, o app calcula distância e pace médio a partir dos segmentos com `minutes` e `speedKmh`.
 
 Regras:
 
@@ -185,7 +185,7 @@ Regras:
 
 ## Roadmap recomendado
 
-### Fase 1 - HTML estatico validavel
+### Fase 1 - HTML estático validavel
 
 Objetivo: validar uso real durante treino sem instalar app.
 
@@ -229,12 +229,12 @@ Entregas:
 
 - estrutura de pastas;
 - banco SQLite com migrations;
-- repositorios locais;
+- repositórios locais;
 - schemas Zod de importacao/exportacao;
-- telas: Dashboard, Plano, Detalhe, Execucao, Registro, Historico, Dados;
+- telas: Dashboard, Plano, Detalhe, Execução, Registro, Histórico, Dados;
 - instalacao via AltStore.
 
-### Fase 4 - Evolucao de treino
+### Fase 4 - Evolução de treino
 
 Objetivo: acompanhar melhor carga e progresso.
 
@@ -244,7 +244,7 @@ Entregas:
 - graficos;
 - estatisticas semanais;
 - carga semanal incluindo CrossFit/musculacao;
-- edicao manual de treino;
+- edição manual de treino;
 - notificacoes locais.
 
 ## Criterios de sucesso do MVP atual
@@ -253,20 +253,20 @@ Entregas:
 - iniciar sem treinos cadastrados;
 - importar plano JSON valido pela tela inicial;
 - iniciar um treino;
-- avancar/voltar etapas;
+- avançar/voltar etapas;
 - finalizar treino;
 - salvar resultado;
-- ver resultado no historico;
-- copiar resumo do historico para analise no chat;
-- baixar historico JSON;
+- ver resultado no histórico;
+- copiar resumo do histórico para análise no chat;
+- baixar histórico JSON;
 - fechar e abrir novamente mantendo os dados;
 - exportar backup JSON;
 - exportar backup JSON.
 
-## Proximas decisoes
+## Próximas decisões
 
-1. Manter HTML estatico por enquanto ou evoluir direto para Expo?
+1. Manter HTML estático por enquanto ou evoluir direto para Expo?
 2. O acompanhamento deve ser por plano fechado ou por agenda semanal recorrente?
-3. O historico deve registrar apenas corrida ou tambem CrossFit/musculacao desde ja?
-4. O treino concluido pode ser editado depois?
-5. Ao importar novo plano, deve apagar resultados antigos ou manter historico separado?
+3. O histórico deve registrar apenas corrida ou também CrossFit/musculacao desde ja?
+4. O treino concluído pode ser editado depois?
+5. Ao importar novo plano, deve apagar resultados antigos ou manter histórico separado?

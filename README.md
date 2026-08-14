@@ -43,6 +43,11 @@ Incluido:
 - plano por semanas;
 - status de treino planejado/concluido;
 - tela de execucao com cronometro, etapa atual, velocidade, pace e progresso;
+- alternancia entre modo Esteira e modo Rua na tela de treino;
+- no modo Esteira, exibicao de cronometro, velocidade e pace da etapa;
+- no modo Rua, exibicao de km alvo, faixa de pace e tempo estimado;
+- cronometro persistido por timestamp para recuperar tempo apos bloqueio/reabertura;
+- tentativa de manter a tela ligada durante o treino com Screen Wake Lock quando suportado;
 - controles de iniciar, pausar, continuar, voltar etapa, avancar etapa e finalizar;
 - formulario de resultado com distancia, tempo, esforco, dor antes/durante/depois e observacoes;
 - historico local;
@@ -73,6 +78,8 @@ No iPhone, abrir o arquivo diretamente pelo WhatsApp pode usar um visualizador t
 3. exportar backup JSON com frequencia.
 
 Para persistencia mais robusta, a proxima evolucao recomendada e transformar em PWA hospedada em uma URL simples ou iniciar o app Expo com SQLite.
+
+Durante a execucao do treino, o app salva o estado do cronometro usando data/hora real. Se o iPhone bloquear a tela ou suspender o JavaScript, ao voltar o app recalcula o tempo decorrido e avanca para a etapa correta. O app tambem tenta usar Screen Wake Lock para manter a tela ligada, mas o suporte depende do navegador/iOS e nao e garantido.
 
 ## Modelo de dados atual
 
@@ -159,6 +166,15 @@ Exemplo minimo:
   }
 }
 ```
+
+
+Campos opcionais por treino para corrida na rua:
+
+- `targetDistanceKm`: distancia alvo total do treino em km;
+- `paceRangeMinKm`: faixa de pace alvo no formato `["6:00", "6:30"]`;
+- alternativamente, pode usar `paceMinKm` e `paceMaxKm`.
+
+Quando esses campos existem, a tela de treino mostra km alvo, pace alvo e tempo estimado. Quando nao existem, o app calcula distancia e pace medio a partir dos segmentos com `minutes` e `speedKmh`.
 
 Regras:
 

@@ -473,6 +473,34 @@
         background: var(--surface-2);
       }
 
+      .mode-toggle {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 6px;
+        padding: 4px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: #0d1118;
+      }
+
+      .mode-button {
+        min-height: 46px;
+        border-radius: 6px;
+        background: transparent;
+        color: var(--muted);
+        font-weight: 900;
+      }
+
+      .mode-button.active {
+        background: var(--surface-2);
+        color: var(--text);
+      }
+
+      .metric-panel {
+        display: grid;
+        gap: 14px;
+      }
+
       .big-controls {
         display: grid;
         grid-template-columns: 1fr 1fr;
@@ -694,22 +722,42 @@
             <div class="stage-name" id="runnerSegmentName">Selecione um treino</div>
             <p class="muted" id="runnerSegmentNote">Abra um treino no plano ou inicie pelo dashboard.</p>
           </div>
-          <div class="runner-info hidden" id="runnerNextPanel">
-            <div class="label">Proximo</div>
-            <strong id="runnerNextLabel">--</strong>
+          <div class="mode-toggle" aria-label="Tipo de treino">
+            <button class="mode-button active" type="button" data-runner-mode="treadmill">Esteira</button>
+            <button class="mode-button" type="button" data-runner-mode="street">Rua</button>
           </div>
-          <div>
-            <div class="timer" id="runnerTimer">00:00</div>
-            <div class="progress"><div class="bar" id="runnerProgress"></div></div>
-          </div>
-          <div class="pace-box">
+
+          <div class="metric-panel" id="treadmillMetricsPanel">
             <div>
-              <div class="label">Velocidade</div>
-              <div class="value" id="runnerSpeed">--</div>
+              <div class="timer" id="runnerTimer">00:00</div>
+              <div class="progress"><div class="bar" id="runnerProgress"></div></div>
             </div>
-            <div>
-              <div class="label">Pace</div>
-              <div class="value" id="runnerPace">--</div>
+            <div class="pace-box">
+              <div>
+                <div class="label">Velocidade</div>
+                <div class="value" id="runnerSpeed">--</div>
+              </div>
+              <div>
+                <div class="label">Pace</div>
+                <div class="value" id="runnerPace">--</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="metric-panel hidden" id="streetMetricsPanel">
+            <div class="pace-box">
+              <div>
+                <div class="label">Km do treino</div>
+                <div class="value" id="runnerWorkoutDistance">--</div>
+              </div>
+              <div>
+                <div class="label">Pace alvo</div>
+                <div class="value" id="runnerWorkoutPaceRange">--</div>
+              </div>
+            </div>
+            <div class="runner-info hidden" id="runnerWorkoutEstimatePanel">
+              <div class="label">Tempo estimado</div>
+              <strong id="runnerWorkoutEstimate">--</strong>
             </div>
           </div>
           <div class="big-controls">
@@ -1390,25 +1438,29 @@
       };
 
       const state = loadState();
-      let selectedWorkoutId = findNextWorkout()?.id || null;
-      let activeSegmentIndex = 0;
-      let elapsedInSegment = 0;
+      let selectedWorkoutId = state.activeRun?.workoutId || findNextWorkout()?.id || null;
+      let activeSegmentIndex = state.activeRun?.segmentIndex || 0;
+      let elapsedInSegment = state.activeRun?.elapsedInSegment || 0;
+      let runnerMode = state.runnerMode || "treadmill";
       let intervalId = null;
+      let wakeLock = null;
 
       function loadState() {
         const stored = localStorage.getItem(STORAGE_KEY);
         if (!stored) {
-          return { plan: emptyPlan, results: [] };
+          return { plan: emptyPlan, results: [], activeRun: null, runnerMode: "treadmill" };
         }
 
         try {
           const parsed = JSON.parse(stored);
           return {
             plan: parsed.plan || emptyPlan,
-            results: Array.isArray(parsed.results) ? parsed.results : []
+            results: Array.isArray(parsed.results) ? parsed.results : [],
+            activeRun: parsed.activeRun || null,
+            runnerMode: parsed.runnerMode || "treadmill"
           };
         } catch {
-          return { plan: emptyPlan, results: [] };
+          return { plan: emptyPlan, results: [], activeRun: null, runnerMode: "treadmill" };
         }
       }
 
@@ -1442,12 +1494,189 @@
         return Math.max(1, Math.round(Number(segment.minutes || 0) * 60));
       }
 
+      function workoutTotalSeconds(workout) {
+        return workout.segments.reduce((sum, segment) => sum + segmentSeconds(segment), 0);
+      }
+
+      function secondsBeforeSegment(workout, segmentIndex) {
+        return workout.segments.slice(0, segmentIndex).reduce((sum, segment) => sum + segmentSeconds(segment), 0);
+      }
+
+      function getAbsoluteElapsedSeconds() {
+        const workout = getWorkout(selectedWorkoutId);
+        if (!workout) return 0;
+        return secondsBeforeSegment(workout, activeSegmentIndex) + elapsedInSegment;
+      }
+
+      function applyAbsoluteElapsedSeconds(workout, absoluteSeconds) {
+        const totalSeconds = workoutTotalSeconds(workout);
+        let remainingSeconds = Math.max(0, Math.min(absoluteSeconds, totalSeconds));
+        let nextSegmentIndex = 0;
+
+        for (let index = 0; index < workout.segments.length; index += 1) {
+          const duration = segmentSeconds(workout.segments[index]);
+          if (remainingSeconds < duration || index === workout.segments.length - 1) {
+            nextSegmentIndex = index;
+            break;
+          }
+          remainingSeconds -= duration;
+        }
+
+        activeSegmentIndex = nextSegmentIndex;
+        elapsedInSegment = Math.min(remainingSeconds, segmentSeconds(workout.segments[nextSegmentIndex]));
+      }
+
+      function persistActiveRun(isRunning) {
+        if (!selectedWorkoutId) {
+          state.activeRun = null;
+          saveState();
+          return;
+        }
+
+        state.activeRun = {
+          workoutId: selectedWorkoutId,
+          segmentIndex: activeSegmentIndex,
+          elapsedInSegment,
+          accumulatedSeconds: getAbsoluteElapsedSeconds(),
+          startedAt: isRunning ? new Date().toISOString() : null,
+          isRunning
+        };
+        saveState();
+      }
+
+      function clearActiveRun() {
+        state.activeRun = null;
+        saveState();
+      }
+
+      function syncRunFromTimestamp() {
+        const run = state.activeRun;
+        if (!run?.isRunning || !run.startedAt) return false;
+
+        const workout = getWorkout(run.workoutId);
+        if (!workout) {
+          clearActiveRun();
+          return false;
+        }
+
+        selectedWorkoutId = run.workoutId;
+        const elapsedSinceStart = Math.max(0, Math.floor((Date.now() - new Date(run.startedAt).getTime()) / 1000));
+        const absoluteSeconds = Number(run.accumulatedSeconds || 0) + elapsedSinceStart;
+        const totalSeconds = workoutTotalSeconds(workout);
+        applyAbsoluteElapsedSeconds(workout, absoluteSeconds);
+
+        if (absoluteSeconds >= totalSeconds) {
+          stopTimer({ persistPause: false, sync: false });
+          clearActiveRun();
+          openResultForm();
+          showToast("Treino finalizado");
+          return true;
+        }
+
+        state.activeRun.segmentIndex = activeSegmentIndex;
+        state.activeRun.elapsedInSegment = elapsedInSegment;
+        saveState();
+        return false;
+      }
+
+      async function requestWakeLock() {
+        if (!("wakeLock" in navigator)) return;
+        try {
+          wakeLock = await navigator.wakeLock.request("screen");
+          wakeLock.addEventListener("release", () => {
+            wakeLock = null;
+          });
+        } catch {
+          wakeLock = null;
+        }
+      }
+
+      async function releaseWakeLock() {
+        if (!wakeLock) return;
+        try {
+          await wakeLock.release();
+        } catch {
+          // Wake Lock pode ja ter sido liberado pelo sistema.
+        }
+        wakeLock = null;
+      }
+
+
       function speedToPace(speedKmh) {
         if (!speedKmh) return "--";
         const minutesPerKm = 60 / Number(speedKmh);
         const minutes = Math.floor(minutesPerKm);
         const seconds = Math.round((minutesPerKm - minutes) * 60);
         return `${minutes}:${String(seconds).padStart(2, "0")}/km`;
+      }
+
+      function paceToSecondsPerKm(value) {
+        if (value === null || value === undefined || value === "") return null;
+        if (typeof value === "number") return Math.round(value * 60);
+        const normalized = String(value).trim().replace(",", ".");
+        if (!normalized) return null;
+        if (normalized.includes(":")) {
+          const [minutes, seconds = "0"] = normalized.split(":").map(Number);
+          if (Number.isFinite(minutes) && Number.isFinite(seconds)) return Math.round(minutes * 60 + seconds);
+        }
+        const asNumber = Number(normalized);
+        return Number.isFinite(asNumber) ? Math.round(asNumber * 60) : null;
+      }
+
+      function formatPaceSeconds(seconds) {
+        if (!Number.isFinite(seconds)) return "--";
+        const minutes = Math.floor(seconds / 60);
+        const remainingSeconds = Math.round(seconds % 60);
+        return `${minutes}:${String(remainingSeconds).padStart(2, "0")}/km`;
+      }
+
+      function formatDurationRange(minMinutes, maxMinutes) {
+        if (!Number.isFinite(minMinutes) || !Number.isFinite(maxMinutes)) return "--";
+        const format = (minutesValue) => {
+          const rounded = Math.round(minutesValue);
+          const hours = Math.floor(rounded / 60);
+          const minutes = rounded % 60;
+          return hours ? `${hours}h${String(minutes).padStart(2, "0")}` : `${minutes} min`;
+        };
+        return Math.round(minMinutes) === Math.round(maxMinutes) ? format(minMinutes) : `${format(minMinutes)} - ${format(maxMinutes)}`;
+      }
+
+      function workoutDerivedDistanceKm(workout) {
+        const explicitDistance = Number(workout.targetDistanceKm || workout.distanceKm || 0);
+        if (explicitDistance > 0) return explicitDistance;
+        return workout.segments.reduce((sum, segment) => sum + (Number(segment.speedKmh || 0) * Number(segment.minutes || 0)) / 60, 0);
+      }
+
+      function normalizePaceRange(workout) {
+        const range = workout.paceRangeMinKm || workout.paceRange || workout.targetPaceRange;
+        if (Array.isArray(range) && range.length >= 2) {
+          const first = paceToSecondsPerKm(range[0]);
+          const second = paceToSecondsPerKm(range[1]);
+          if (first && second) return [Math.min(first, second), Math.max(first, second)];
+        }
+
+        const minPace = paceToSecondsPerKm(workout.paceMinKm || workout.minPaceMinKm || workout.targetPaceMinKm);
+        const maxPace = paceToSecondsPerKm(workout.paceMaxKm || workout.maxPaceMinKm || workout.targetPaceMaxKm);
+        if (minPace && maxPace) return [Math.min(minPace, maxPace), Math.max(minPace, maxPace)];
+
+        const distanceKm = workoutDerivedDistanceKm(workout);
+        const minutes = totalPlannedMinutes(workout);
+        if (distanceKm > 0 && minutes > 0) {
+          const seconds = Math.round((minutes / distanceKm) * 60);
+          return [seconds, seconds];
+        }
+
+        return null;
+      }
+
+      function workoutTargetMetrics(workout) {
+        const distanceKm = workoutDerivedDistanceKm(workout);
+        const paceRange = normalizePaceRange(workout);
+        const estimatedMinutesRange = distanceKm > 0 && paceRange
+          ? [(distanceKm * paceRange[0]) / 60, (distanceKm * paceRange[1]) / 60]
+          : null;
+
+        return { distanceKm, paceRange, estimatedMinutesRange };
       }
 
       function segmentKey(segment) {
@@ -1514,6 +1743,21 @@
         toast.textContent = message;
         toast.classList.add("show");
         window.setTimeout(() => toast.classList.remove("show"), 2200);
+      }
+
+      function applyRunnerMode() {
+        document.querySelectorAll("[data-runner-mode]").forEach((button) => {
+          button.classList.toggle("active", button.dataset.runnerMode === runnerMode);
+        });
+        document.getElementById("treadmillMetricsPanel").classList.toggle("hidden", runnerMode !== "treadmill");
+        document.getElementById("streetMetricsPanel").classList.toggle("hidden", runnerMode !== "street");
+      }
+
+      function setRunnerMode(mode) {
+        runnerMode = mode;
+        state.runnerMode = mode;
+        saveState();
+        applyRunnerMode();
       }
 
       function renderDashboard() {
@@ -1602,15 +1846,18 @@
           document.getElementById("runnerTimer").textContent = "00:00";
           document.getElementById("runnerSpeed").textContent = "--";
           document.getElementById("runnerPace").textContent = "--";
+          document.getElementById("runnerWorkoutDistance").textContent = "--";
+          document.getElementById("runnerWorkoutPaceRange").textContent = "--";
+          document.getElementById("runnerWorkoutEstimate").textContent = "--";
+          document.getElementById("runnerWorkoutEstimatePanel").classList.add("hidden");
           document.getElementById("runnerProgress").style.width = "0%";
-          document.getElementById("runnerNextPanel").classList.add("hidden");
+          applyRunnerMode();
           document.getElementById("runnerRoundLabel").classList.add("hidden");
           document.getElementById("runnerSequenceList").innerHTML = '<div class="empty">Selecione um treino para ver a sequencia.</div>';
           return;
         }
 
         const segment = workout.segments[activeSegmentIndex];
-        const nextSegment = workout.segments[activeSegmentIndex + 1];
         const intervalContext = findIntervalContext(workout, activeSegmentIndex);
         const duration = segmentSeconds(segment);
         const percent = Math.min(100, Math.round((elapsedInSegment / duration) * 100));
@@ -1621,16 +1868,24 @@
         document.getElementById("runnerTimer").textContent = formatTimer(Math.max(0, duration - elapsedInSegment));
         document.getElementById("runnerSpeed").textContent = `${Number(segment.speedKmh || 0).toFixed(1)} km/h`;
         document.getElementById("runnerPace").textContent = speedToPace(segment.speedKmh);
+        const targetMetrics = workoutTargetMetrics(workout);
+        const distanceLabel = targetMetrics.distanceKm > 0 ? `${targetMetrics.distanceKm.toFixed(1)} km` : "--";
+        const paceRangeLabel = targetMetrics.paceRange
+          ? targetMetrics.paceRange[0] === targetMetrics.paceRange[1]
+            ? formatPaceSeconds(targetMetrics.paceRange[0])
+            : `${formatPaceSeconds(targetMetrics.paceRange[0])} - ${formatPaceSeconds(targetMetrics.paceRange[1])}`
+          : "--";
+        document.getElementById("runnerWorkoutDistance").textContent = distanceLabel;
+        document.getElementById("runnerWorkoutPaceRange").textContent = paceRangeLabel;
+        if (targetMetrics.estimatedMinutesRange) {
+          document.getElementById("runnerWorkoutEstimatePanel").classList.remove("hidden");
+          document.getElementById("runnerWorkoutEstimate").textContent = formatDurationRange(targetMetrics.estimatedMinutesRange[0], targetMetrics.estimatedMinutesRange[1]);
+        } else {
+          document.getElementById("runnerWorkoutEstimatePanel").classList.add("hidden");
+        }
         document.getElementById("runnerProgress").style.width = `${percent}%`;
         document.getElementById("toggleRunButton").textContent = intervalId ? "Pausar" : elapsedInSegment > 0 ? "Continuar" : "Iniciar";
-
-        const nextPanel = document.getElementById("runnerNextPanel");
-        if (nextSegment) {
-          nextPanel.classList.remove("hidden");
-          document.getElementById("runnerNextLabel").textContent = `${nextSegment.name} - ${nextSegment.minutes} min - ${Number(nextSegment.speedKmh || 0).toFixed(1)} km/h`;
-        } else {
-          nextPanel.classList.add("hidden");
-        }
+        applyRunnerMode();
 
         const roundLabel = document.getElementById("runnerRoundLabel");
         const sequenceList = document.getElementById("runnerSequenceList");
@@ -1696,6 +1951,8 @@
                       day: "Terca",
                       title: "Esteira leve",
                       target: "Base",
+                      targetDistanceKm: 5,
+                      paceRangeMinKm: ["6:00", "6:30"],
                       segments: [{ name: "Corrida leve", minutes: 30, speedKmh: 8.5, note: "Confortavel" }]
                     }
                   ]
@@ -1722,46 +1979,51 @@
       }
 
       function selectWorkout(id) {
-        stopTimer();
+        stopTimer({ persistPause: false });
         selectedWorkoutId = id;
         activeSegmentIndex = 0;
         elapsedInSegment = 0;
+        clearActiveRun();
         document.getElementById("resultPanel").classList.add("hidden");
         renderRunner();
       }
 
       function startTimer() {
         if (intervalId) return;
+        const workout = getWorkout(selectedWorkoutId);
+        if (!workout) return;
+        const shouldResumeSavedRun = state.activeRun?.isRunning && state.activeRun.workoutId === selectedWorkoutId;
+        const finished = shouldResumeSavedRun ? syncRunFromTimestamp() : false;
+        if (finished) return;
+        if (!shouldResumeSavedRun) {
+          persistActiveRun(true);
+        }
+        requestWakeLock();
         intervalId = window.setInterval(() => {
-          const workout = getWorkout(selectedWorkoutId);
-          if (!workout) return;
-          const segment = workout.segments[activeSegmentIndex];
-          elapsedInSegment += 1;
-          if (elapsedInSegment >= segmentSeconds(segment)) {
-            if (activeSegmentIndex < workout.segments.length - 1) {
-              activeSegmentIndex += 1;
-              elapsedInSegment = 0;
-              showToast("Proxima etapa");
-            } else {
-              stopTimer();
-              openResultForm();
-              showToast("Treino finalizado");
-            }
-          }
-          renderRunner();
+          const finishedOnTick = syncRunFromTimestamp();
+          if (!finishedOnTick) renderRunner();
         }, 1000);
         renderRunner();
       }
 
-      function stopTimer() {
+      function stopTimer(options = {}) {
+        const { persistPause = true, sync = true } = options;
+        if (sync && state.activeRun?.isRunning) {
+          syncRunFromTimestamp();
+        }
         if (intervalId) {
           window.clearInterval(intervalId);
           intervalId = null;
         }
+        releaseWakeLock();
+        if (persistPause && selectedWorkoutId) {
+          persistActiveRun(false);
+        }
       }
 
       function openResultForm() {
-        stopTimer();
+        stopTimer({ persistPause: false });
+        clearActiveRun();
         const workout = getWorkout(selectedWorkoutId);
         document.getElementById("resultPanel").classList.remove("hidden");
         if (workout) {
@@ -1918,6 +2180,11 @@
               day: workout.day || "Dia livre",
               title: workout.title || `Treino ${workoutIndex + 1}`,
               target: workout.target || "",
+              targetDistanceKm: workout.targetDistanceKm !== undefined ? Number(workout.targetDistanceKm) : undefined,
+              distanceKm: workout.distanceKm !== undefined ? Number(workout.distanceKm) : undefined,
+              paceRangeMinKm: workout.paceRangeMinKm || workout.paceRange || workout.targetPaceRange || undefined,
+              paceMinKm: workout.paceMinKm || workout.minPaceMinKm || workout.targetPaceMinKm || undefined,
+              paceMaxKm: workout.paceMaxKm || workout.maxPaceMinKm || workout.targetPaceMaxKm || undefined,
               segments: workout.segments.map((segment) => ({
                 name: String(segment.name),
                 minutes: Number(segment.minutes),
@@ -1931,6 +2198,10 @@
 
       document.querySelectorAll(".tab").forEach((button) => {
         button.addEventListener("click", () => showTab(button.dataset.tab));
+      });
+
+      document.querySelectorAll("[data-runner-mode]").forEach((button) => {
+        button.addEventListener("click", () => setRunnerMode(button.dataset.runnerMode));
       });
 
       document.getElementById("startNextButton").addEventListener("click", () => {
@@ -1953,6 +2224,11 @@
       document.getElementById("prevSegmentButton").addEventListener("click", () => {
         activeSegmentIndex = Math.max(0, activeSegmentIndex - 1);
         elapsedInSegment = 0;
+        if (intervalId) {
+          persistActiveRun(true);
+        } else if (selectedWorkoutId) {
+          persistActiveRun(false);
+        }
         renderRunner();
       });
 
@@ -1961,6 +2237,11 @@
         if (!workout) return;
         activeSegmentIndex = Math.min(workout.segments.length - 1, activeSegmentIndex + 1);
         elapsedInSegment = 0;
+        if (intervalId) {
+          persistActiveRun(true);
+        } else if (selectedWorkoutId) {
+          persistActiveRun(false);
+        }
         renderRunner();
       });
 
@@ -2001,7 +2282,8 @@
         try {
           const imported = JSON.parse(await file.text());
           state.plan = validateImportedPlan(imported);
-          state.results = Array.isArray(imported.results) ? imported.results : [];
+            state.results = Array.isArray(imported.results) ? imported.results : [];
+          state.activeRun = null;
           saveState();
           selectWorkout(findNextWorkout()?.id);
           showToast("Plano importado");
@@ -2046,11 +2328,28 @@
         stopTimer();
         state.plan = emptyPlan;
         state.results = [];
+        state.activeRun = null;
         saveState();
         selectWorkout(findNextWorkout()?.id);
         showToast("Dados locais limpos");
         showTab("dashboard");
       });
+
+      document.addEventListener("visibilitychange", () => {
+        if (document.visibilityState === "visible") {
+          const finished = syncRunFromTimestamp();
+          if (state.activeRun?.isRunning && !wakeLock) requestWakeLock();
+          if (!finished) renderRunner();
+        }
+      });
+
+      window.addEventListener("beforeunload", () => {
+        if (state.activeRun?.isRunning) syncRunFromTimestamp();
+      });
+
+      if (state.activeRun?.isRunning) {
+        startTimer();
+      }
 
       if ("serviceWorker" in navigator && location.protocol !== "file:") {
         window.addEventListener("load", () => {

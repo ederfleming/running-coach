@@ -37,22 +37,22 @@ O app deve permitir:
 
 ## Escopo da versão HTML
 
-Incluido:
+Incluído:
 
-- dashboard com proximo treino, progresso, concluídos, km acumulados e sequencia;
+- dashboard com próximo treino, progresso, concluídos, km acumulados e sequência;
 - plano por semanas;
 - status de treino planejado/concluído;
 - tela de execução com cronômetro, etapa atual, velocidade, pace e progresso;
 - alternância entre modo Esteira e modo Rua na tela de treino;
 - no modo Esteira, exibição de cronômetro, velocidade e pace da etapa;
 - no modo Rua, exibição de km alvo, faixa de pace e tempo estimado;
-- cronômetro persistido por timestamp para recuperar tempo apos bloqueio/reabertura;
+- cronômetro persistido por timestamp para recuperar tempo após bloqueio/reabertura;
 - tentativa de manter a tela ligada durante o treino com Screen Wake Lock quando suportado;
 - controles de iniciar, pausar, continuar, voltar etapa, avançar etapa e finalizar;
-- formulario de resultado com distância, tempo, esforco, dor antes/durante/depois e observacoes;
+- formulário de resultado com distância, tempo, esforço, dor antes/durante/depois e observações;
 - histórico local;
-- importacao de JSON direto na tela inicial e na tela de dados;
-- exportacao de backup JSON;
+- importação de JSON direto na tela inicial e na tela de dados;
+- exportação de backup JSON;
 - estado inicial sem treinos cadastrados.
 
 Fora desta versão:
@@ -75,11 +75,11 @@ No iPhone, abrir o arquivo diretamente pelo WhatsApp pode usar um visualizador t
 
 1. abrir o arquivo no Safari ou Chrome;
 2. usar sempre o mesmo navegador;
-3. exportar backup JSON com frequencia.
+3. exportar backup JSON com frequência.
 
-Para persistência mais robusta, a proxima evolucao recomendada e transformar em PWA hospedada em uma URL simples ou iniciar o app Expo com SQLite.
+Para persistência mais robusta, a próxima evolução recomendada e transformar em PWA hospedada em uma URL simples ou iniciar o app Expo com SQLite.
 
-Durante a execução do treino, o app salva o estado do cronômetro usando data/hora real. Se o iPhone bloquear a tela ou suspender o JavaScript, ao voltar o app recalcula o tempo decorrido e avança para a etapa correta. O app também tenta usar Screen Wake Lock para manter a tela ligada, mas o suporte depende do navegador/iOS e não e garantido.
+Durante a execução do treino, o app salva o estado do cronômetro usando data/hora real. Se o iPhone bloquear a tela ou suspender o JavaScript, ao voltar o app recalcula o tempo decorrido e avança para a etapa correta. O app também tenta usar Screen Wake Lock para manter a tela ligada, mas o suporte depende do navegador/iOS e não é garantido.
 
 ## Modelo de dados atual
 
@@ -99,7 +99,7 @@ O backup exportado possui esta estrutura:
             "id": "w1-t1",
             "day": "Terça",
             "title": "Esteira leve",
-            "target": "Base aerobica",
+            "target": "Base aeróbica",
             "segments": [
               {
                 "name": "Aquecimento",
@@ -130,7 +130,7 @@ O backup exportado possui esta estrutura:
 }
 ```
 
-## Formato de importacao de plano
+## Formato de importação de plano
 
 O app aceita um JSON contendo `plan` ou diretamente o objeto do plano.
 
@@ -149,14 +149,31 @@ Exemplo mínimo:
           {
             "id": "s1-t1",
             "day": "Terça",
-            "title": "Esteira leve",
-            "target": "Base",
+            "title": "Intervalado moderado",
+            "target": "Blocos fortes com recuperação leve",
+            "type": "Treino Intervalado (Tiros)",
+            "intensityZone": "Z3-Z4",
             "segments": [
               {
-                "name": "Corrida leve",
-                "minutes": 30,
-                "speedKmh": 8.5,
-                "note": "Confortavel"
+                "name": "Aquecimento",
+                "minutes": 10,
+                "speedKmh": 7.5,
+                "zone": "Z1-Z2",
+                "note": "Comece confortável"
+              },
+              {
+                "name": "Bloco moderado 1",
+                "minutes": 2,
+                "speedKmh": 9.2,
+                "zone": "Z3-Z4",
+                "note": "Ritmo controlado"
+              },
+              {
+                "name": "Recuperação 1",
+                "minutes": 1.5,
+                "speedKmh": 7.5,
+                "zone": "Z1-Z2",
+                "note": "Respire e recupere"
               }
             ]
           }
@@ -170,9 +187,19 @@ Exemplo mínimo:
 
 Campos opcionais por treino para corrida na rua:
 
+- `type`: tipo do treino. Use `Rodagem Leve (Tiro Curto/Fácil)`, `Longão`, `Treino Progressivo`, `Treino Intervalado (Tiros)`, `Fartlek`, `Treino de Ritmo (Tempo Run)` ou `Treino de Recuperação ou Regenerativo`;
+- `intensityZone`: zona principal do treino, como `Z1`, `Z2`, `Z3`, `Z4`, `Z5` ou faixas como `Z3-Z4`;
 - `targetDistanceKm`: distância alvo total do treino em km;
 - `paceRangeMinKm`: faixa de pace alvo no formato `["6:00", "6:30"]`;
-- alternativamente, pode usar `paceMinKm` e `paceMaxKm`.
+- alternativamente, pode usar `paceMinKm` e `paceMaxKm`;
+
+
+A zona de cada etapa deve ser informada com `zone` ou `intensityZone`. Quando ausente, o app usa a zona principal do treino como fallback.
+
+## Zonas de pace
+
+Na aba `Dados`, o questionário de 3 km calcula faixas iniciais de pace para Z1 a Z5. Informe o tempo no formato `min:seg` e confirme que o teste foi realizado em esforço forte e constante. Opcionalmente, informe FC máxima medida e FC de repouso para ver as mesmas zonas em BPM pela reserva de frequência cardíaca. Quando um treino ou segmento tiver `zone` ou `intensityZone`, a faixa pessoal também aparece no plano e na tela de execução. O perfil fica salvo localmente e é incluído no backup JSON completo.
+- cada segmento também pode ter `zone` ou `intensityZone` para indicar a zona daquela etapa.
 
 Quando esses campos existem, a tela de treino mostra km alvo, pace alvo e tempo estimado. Quando não existem, o app calcula distância e pace médio a partir dos segmentos com `minutes` e `speedKmh`.
 
@@ -230,7 +257,7 @@ Entregas:
 - estrutura de pastas;
 - banco SQLite com migrations;
 - repositórios locais;
-- schemas Zod de importacao/exportacao;
+- schemas Zod de importação/exportação;
 - telas: Dashboard, Plano, Detalhe, Execução, Registro, Histórico, Dados;
 - instalacao via AltStore.
 

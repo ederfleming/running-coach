@@ -221,6 +221,26 @@
         color: var(--muted);
       }
 
+      .plan-card-subtitle {
+        margin-top: 4px;
+        font-size: 13px;
+        line-height: 1.35;
+      }
+
+      .plan-card-meta {
+        margin-top: 2px;
+        font-size: 12px;
+        line-height: 1.35;
+      }
+
+      .plan-card-guidance,
+      .runner-zone-guidance {
+        margin-top: 4px;
+        color: var(--cyan);
+        font-size: 12px;
+        line-height: 1.35;
+      }
+
       .stack {
         display: grid;
         gap: 10px;
@@ -468,23 +488,27 @@
       }
 
       .pace-box > div {
-        padding: 14px;
+        padding: 11px;
         border-radius: 8px;
         background: var(--surface-2);
+      }
+
+      .pace-box .value {
+        font-size: 24px;
       }
 
       .mode-toggle {
         display: grid;
         grid-template-columns: 1fr 1fr;
-        gap: 6px;
-        padding: 4px;
+        gap: 5px;
+        padding: 3px;
         border: 1px solid var(--line);
         border-radius: 8px;
         background: #0d1118;
       }
 
       .mode-button {
-        min-height: 46px;
+        min-height: 38px;
         border-radius: 6px;
         background: transparent;
         color: var(--muted);
@@ -615,6 +639,104 @@
         gap: 10px;
       }
 
+      .guide-list {
+        display: grid;
+      }
+
+      .guide-item {
+        padding: 12px 0;
+        border-top: 1px solid var(--line);
+      }
+
+      .guide-item:first-child {
+        padding-top: 0;
+        border-top: 0;
+      }
+
+      .guide-item:last-child {
+        padding-bottom: 0;
+      }
+
+      .guide-item strong {
+        display: block;
+        font-size: 14px;
+      }
+
+      .guide-item p,
+      .assessment-note {
+        margin-top: 4px;
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.45;
+      }
+
+      .check-field {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.35;
+      }
+
+      .check-field input {
+        width: 18px;
+        min-height: 18px;
+        margin: 0;
+        accent-color: var(--orange);
+      }
+
+      .zone-result {
+        display: grid;
+        gap: 12px;
+      }
+
+      .zone-result-summary {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+      }
+
+      .zone-result-summary strong {
+        display: block;
+        margin-top: 3px;
+        font-size: 17px;
+      }
+
+      .zone-list {
+        display: grid;
+      }
+
+      .zone-row {
+        display: grid;
+        grid-template-columns: 42px 1fr;
+        gap: 10px;
+        align-items: center;
+        padding: 10px 0;
+        border-top: 1px solid var(--line);
+      }
+
+      .zone-row b {
+        color: var(--cyan);
+        font-size: 14px;
+      }
+
+      .zone-row strong,
+      .zone-row span {
+        display: block;
+      }
+
+      .zone-row strong {
+        font-size: 14px;
+      }
+
+      .zone-row span {
+        margin-top: 2px;
+        color: var(--muted);
+        font-size: 12px;
+      }
+
       .import-status {
         display: grid;
         gap: 10px;
@@ -740,7 +862,7 @@
             <div class="value" id="planProgress">0%</div>
           </div>
           <div class="metric">
-            <div class="label">Concluidos</div>
+            <div class="label">Concluídos</div>
             <div class="value" id="doneCount">0</div>
           </div>
           <div class="metric">
@@ -765,18 +887,19 @@
 
       <section class="section" id="workout">
         <div class="panel workout-stage" id="runnerPanel">
+          <div class="mode-toggle" aria-label="Local do treino">
+            <button class="mode-button active" type="button" data-runner-mode="treadmill">Esteira</button>
+            <button class="mode-button" type="button" data-runner-mode="street">Rua</button>
+          </div>
           <div>
             <div class="card-row">
               <span class="pill current" id="runnerWorkoutLabel">Treino</span>
               <span class="pill" id="runnerStepLabel">0/0</span>
             </div>
-            <div style="height: 18px"></div>
+            <div style="height: 14px"></div>
             <div class="stage-name" id="runnerSegmentName">Selecione um treino</div>
             <p class="muted" id="runnerSegmentNote">Abra um treino no plano ou inicie pelo dashboard.</p>
-          </div>
-          <div class="mode-toggle" aria-label="Tipo de treino">
-            <button class="mode-button active" type="button" data-runner-mode="treadmill">Esteira</button>
-            <button class="mode-button" type="button" data-runner-mode="street">Rua</button>
+            <p class="runner-zone-guidance hidden" id="runnerZoneGuidance"></p>
           </div>
 
           <div class="metric-panel" id="treadmillMetricsPanel">
@@ -872,7 +995,7 @@
             </div>
             <label class="field">
               <span>Observações</span>
-              <textarea id="notesInput" placeholder="Esteira, rua, sensacoes, ajustes..."></textarea>
+              <textarea id="notesInput" placeholder="Esteira, rua, sensações, ajustes..."></textarea>
             </label>
             <button class="primary wide" type="submit">Salvar resultado</button>
           </form>
@@ -902,6 +1025,79 @@
       <section class="section" id="data">
         <div class="panel">
           <div class="panel-title">
+            <h2>Encontrar zonas de pace</h2>
+            <span class="pill">Teste de 3 km</span>
+          </div>
+          <form class="form" id="zoneAssessmentForm">
+            <p class="muted">Use um teste de 3 km feito em esforço forte e controlado. As faixas são uma referência inicial de pace.</p>
+            <div class="form-row">
+              <label class="field">
+                <span>Tempo nos 3 km</span>
+                <input id="zoneTestTimeInput" inputmode="numeric" placeholder="18:30" pattern="[0-9]{1,2}:[0-5][0-9]" required />
+              </label>
+              <label class="field">
+                <span>Data do teste</span>
+                <input id="zoneTestDateInput" type="date" />
+              </label>
+            </div>
+            <div class="form-row">
+              <label class="field">
+                <span>FC máxima (bpm, opcional)</span>
+                <input id="zoneMaxHeartRateInput" inputmode="numeric" min="120" max="240" placeholder="190" />
+              </label>
+              <label class="field">
+                <span>FC de repouso (bpm, opcional)</span>
+                <input id="zoneRestingHeartRateInput" inputmode="numeric" min="30" max="120" placeholder="55" />
+              </label>
+            </div>
+            <label class="check-field">
+              <input id="zoneTestEffortInput" type="checkbox" required />
+              <span>Fiz o teste em esforço forte e constante, sem considerar pausas.</span>
+            </label>
+            <button class="primary wide" type="submit">Calcular zonas de pace</button>
+          </form>
+          <div class="zone-result hidden" id="zoneAssessmentResult">
+            <div class="zone-result-summary">
+              <div>
+                <div class="label">Pace do teste</div>
+                <strong id="zoneTestPace">--</strong>
+              </div>
+              <span class="pill" id="zoneAssessmentDate">--</span>
+            </div>
+            <div class="zone-list" id="zoneAssessmentList"></div>
+            <p class="assessment-note">As faixas de BPM usam FC máxima e FC de repouso informadas. Revise pace e frequência conforme sua percepção, terreno e evolução; elas não substituem avaliação profissional.</p>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-title">
+            <h2>Categorias de treino</h2>
+          </div>
+          <div class="guide-list">
+            <div class="guide-item"><strong>Rodagem Leve (Tiro Curto/Fácil)</strong><p>Ritmo confortável para construir base aeróbica e acumular volume.</p></div>
+            <div class="guide-item"><strong>Longão</strong><p>Corrida mais longa da semana, feita com controle para desenvolver resistência.</p></div>
+            <div class="guide-item"><strong>Treino Progressivo</strong><p>Começa leve e aumenta o ritmo gradualmente até um final firme.</p></div>
+            <div class="guide-item"><strong>Treino Intervalado (Tiros)</strong><p>Repetições mais intensas intercaladas com recuperação planejada.</p></div>
+            <div class="guide-item"><strong>Fartlek</strong><p>Variações de ritmo com estrutura mais livre e foco em adaptação ao esforço.</p></div>
+            <div class="guide-item"><strong>Treino de Ritmo (Tempo Run)</strong><p>Esforço contínuo e forte controlado, próximo ao ritmo sustentável de limiar.</p></div>
+            <div class="guide-item"><strong>Treino de Recuperação ou Regenerativo</strong><p>Corrida bem leve para facilitar a recuperação entre sessões exigentes.</p></div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-title">
+            <h2>Zonas de intensidade</h2>
+          </div>
+          <div class="guide-list">
+            <div class="guide-item"><strong>Z1 - Recuperação</strong><p>Muito leve; a conversa é fácil e o foco é recuperar.</p></div>
+            <div class="guide-item"><strong>Z2 - Aeróbica</strong><p>Leve e sustentável; base principal para rodagem e longão.</p></div>
+            <div class="guide-item"><strong>Z3 - Moderada</strong><p>Constante e mais exigente; fala curta, mas ainda controlada.</p></div>
+            <div class="guide-item"><strong>Z4 - Limiar</strong><p>Forte controlada; usada em treinos de ritmo e tempo run.</p></div>
+            <div class="guide-item"><strong>Z5 - Alta intensidade</strong><p>Muito forte; usada em tiros curtos, com recuperação adequada.</p></div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-title">
             <h2>Dados</h2>
           </div>
           <div class="import-box">
@@ -915,7 +1111,10 @@
           <div class="panel-title">
             <h2>Formato aceito</h2>
           </div>
-          <pre id="jsonExample" style="white-space: pre-wrap; color: var(--muted); margin: 0; font-size: 12px"></pre>
+          <div class="import-box">
+            <button class="secondary" type="button" id="copyJsonExampleButton">Copiar JSON modelo</button>
+            <pre id="jsonExample" style="white-space: pre-wrap; color: var(--muted); margin: 0; font-size: 12px"></pre>
+          </div>
         </div>
       </section>
     </main>
@@ -961,7 +1160,7 @@
                 id: "w1-t1",
                 day: "Terça",
                 title: "Esteira leve",
-                target: "Base aerobica",
+                target: "Base aeróbica",
                 segments: [
                   { name: "Aquecimento", minutes: 5, speedKmh: 7.0, note: "Solto e confortavel" },
                   { name: "Corrida leve", minutes: 25, speedKmh: 8.5, note: "Respiracao controlada" },
@@ -1000,7 +1199,7 @@
                 id: "w2-t1",
                 day: "Terça",
                 title: "Esteira progressiva",
-                target: "Controle de esforco",
+                target: "Controle de esforço",
                 segments: [
                   { name: "Aquecimento", minutes: 5, speedKmh: 7.0, note: "Solto" },
                   { name: "Leve", minutes: 12, speedKmh: 8.5, note: "Base" },
@@ -1029,7 +1228,7 @@
                 title: "Longo leve",
                 target: "Resistencia",
                 segments: [
-                  { name: "Aquecimento", minutes: 8, speedKmh: 7.0, note: "Confortavel" },
+                  { name: "Aquecimento", minutes: 8, speedKmh: 7.0, note: "Confortável" },
                   { name: "Corrida leve", minutes: 38, speedKmh: 8.0, note: "Sem brigar com o pace" }
                 ]
               }
@@ -1046,7 +1245,7 @@
                 target: "Fechar melhor que comecou",
                 segments: [
                   { name: "Aquecimento", minutes: 5, speedKmh: 7.0, note: "Soltar" },
-                  { name: "Leve", minutes: 20, speedKmh: 8.5, note: "Confortavel" },
+                  { name: "Leve", minutes: 20, speedKmh: 8.5, note: "Confortável" },
                   { name: "Final firme", minutes: 8, speedKmh: 9.5, note: "Boa postura" },
                   { name: "Desaquecimento", minutes: 5, speedKmh: 6.5, note: "Baixar" }
                 ]
@@ -1088,7 +1287,7 @@
                 target: "Absorver carga",
                 segments: [
                   { name: "Aquecimento", minutes: 5, speedKmh: 6.5, note: "Muito fácil" },
-                  { name: "Corrida leve", minutes: 24, speedKmh: 8.0, note: "Confortavel" },
+                  { name: "Corrida leve", minutes: 24, speedKmh: 8.0, note: "Confortável" },
                   { name: "Desaquecimento", minutes: 5, speedKmh: 6.5, note: "Soltar" }
                 ]
               },
@@ -1196,7 +1395,7 @@
                 id: "w6-t3",
                 day: "Domingo",
                 title: "Longo leve",
-                target: "Volume sustentavel",
+                target: "Volume sustentável",
                 segments: [
                   { name: "Aquecimento", minutes: 8, speedKmh: 7.0, note: "Facil" },
                   { name: "Corrida leve", minutes: 47, speedKmh: 8.5, note: "Constante" }
@@ -1216,7 +1415,7 @@
                 segments: [
                   { name: "Aquecimento", minutes: 5, speedKmh: 6.5, note: "Muito leve" },
                   { name: "Corrida leve", minutes: 28, speedKmh: 8.0, note: "Solto" },
-                  { name: "Desaquecimento", minutes: 5, speedKmh: 6.5, note: "Confortavel" }
+                  { name: "Desaquecimento", minutes: 5, speedKmh: 6.5, note: "Confortável" }
                 ]
               },
               {
@@ -1328,7 +1527,7 @@
                 id: "w9-t3",
                 day: "Domingo",
                 title: "Simulado parcial",
-                target: "Medir evolucao",
+                target: "Medir evolução",
                 segments: [
                   { name: "Aquecimento", minutes: 10, speedKmh: 7.0, note: "Facil" },
                   { name: "Bloco 6 km", minutes: 36, speedKmh: 10.0, note: "Pace alvo controlado" },
@@ -1348,7 +1547,7 @@
                 target: "Manter sem acumular fadiga",
                 segments: [
                   { name: "Aquecimento", minutes: 5, speedKmh: 7.0, note: "Facil" },
-                  { name: "Base", minutes: 22, speedKmh: 8.5, note: "Confortavel" },
+                  { name: "Base", minutes: 22, speedKmh: 8.5, note: "Confortável" },
                   { name: "Ritmo", minutes: 8, speedKmh: 10.0, note: "Pace alvo" },
                   { name: "Desaquecimento", minutes: 5, speedKmh: 6.5, note: "Total 40 min" }
                 ]
@@ -1415,7 +1614,7 @@
                 target: "Manter volume sem cansar",
                 segments: [
                   { name: "Aquecimento", minutes: 8, speedKmh: 7.0, note: "Facil" },
-                  { name: "Corrida leve", minutes: 42, speedKmh: 8.5, note: "Confortavel" }
+                  { name: "Corrida leve", minutes: 42, speedKmh: 8.5, note: "Confortável" }
                 ]
               }
             ]
@@ -1475,7 +1674,7 @@
       function loadState() {
         const stored = localStorage.getItem(STORAGE_KEY);
         if (!stored) {
-          return { plan: emptyPlan, results: [], activeRun: null, runnerMode: "treadmill" };
+          return { plan: emptyPlan, results: [], activeRun: null, runnerMode: "treadmill", zoneProfile: null };
         }
 
         try {
@@ -1484,7 +1683,8 @@
             plan: parsed.plan || emptyPlan,
             results: Array.isArray(parsed.results) ? parsed.results : [],
             activeRun: parsed.activeRun || null,
-            runnerMode: parsed.runnerMode || "treadmill"
+            runnerMode: parsed.runnerMode || "treadmill",
+            zoneProfile: parsed.zoneProfile && typeof parsed.zoneProfile === "object" ? parsed.zoneProfile : null
           };
         } catch {
           return { plan: emptyPlan, results: [], activeRun: null, runnerMode: "treadmill" };
@@ -1657,6 +1857,93 @@
         return `${minutes}:${String(remainingSeconds).padStart(2, "0")}/km`;
       }
 
+      function parseClockSeconds(value) {
+        const match = String(value || "").trim().match(/^(\d{1,2}):([0-5]\d)$/);
+        if (!match) return null;
+        return Number(match[1]) * 60 + Number(match[2]);
+      }
+
+      function calculatePaceZones(test3kSeconds) {
+        const testPaceSeconds = test3kSeconds / 3;
+        const definitions = [
+          ["Z1", "Recuperação", 1.4, 1.6],
+          ["Z2", "Aeróbica", 1.22, 1.4],
+          ["Z3", "Moderada", 1.12, 1.22],
+          ["Z4", "Limiar", 1.04, 1.12],
+          ["Z5", "Alta intensidade", 0.92, 1.04]
+        ];
+
+        return definitions.map(([zone, label, fasterMultiplier, slowerMultiplier]) => ({
+          zone,
+          label,
+          fasterPaceSeconds: Math.round(testPaceSeconds * fasterMultiplier),
+          slowerPaceSeconds: Math.round(testPaceSeconds * slowerMultiplier)
+        }));
+      }
+
+      function calculateHeartRateZones(maxHeartRate, restingHeartRate) {
+        if (!Number.isFinite(maxHeartRate) || !Number.isFinite(restingHeartRate) || maxHeartRate <= restingHeartRate) return null;
+        const reserve = maxHeartRate - restingHeartRate;
+        const definitions = [[0.5, 0.6], [0.6, 0.7], [0.7, 0.8], [0.8, 0.9], [0.9, 1]];
+        return definitions.map(([minimum, maximum]) => ({
+          minimumBpm: Math.round(restingHeartRate + reserve * minimum),
+          maximumBpm: Math.round(restingHeartRate + reserve * maximum)
+        }));
+      }
+
+      function personalZoneGuidance(zoneLabel) {
+        const profile = state.zoneProfile;
+        if (!profile?.test3kSeconds) return null;
+        const zoneCodes = [...new Set(String(zoneLabel || "").match(/Z[1-5]/g) || [])];
+        if (!zoneCodes.length) return null;
+        const indices = zoneCodes.map((code) => Number(code.slice(1)) - 1);
+        const paceZones = calculatePaceZones(profile.test3kSeconds);
+        const paceItems = indices.map((index) => paceZones[index]).filter(Boolean);
+        const fasterPace = Math.min(...paceItems.map((item) => item.fasterPaceSeconds));
+        const slowerPace = Math.max(...paceItems.map((item) => item.slowerPaceSeconds));
+        const parts = ["Pace " + formatPaceSeconds(fasterPace) + " - " + formatPaceSeconds(slowerPace)];
+        const heartRateZones = calculateHeartRateZones(Number(profile.maxHeartRate), Number(profile.restingHeartRate));
+        if (heartRateZones) {
+          const heartRateItems = indices.map((index) => heartRateZones[index]).filter(Boolean);
+          const minimumBpm = Math.min(...heartRateItems.map((item) => item.minimumBpm));
+          const maximumBpm = Math.max(...heartRateItems.map((item) => item.maximumBpm));
+          parts.push("FC " + minimumBpm + " - " + maximumBpm + " bpm");
+        }
+        return parts.join(" • ");
+      }
+      function renderZoneAssessment() {
+        const profile = state.zoneProfile;
+        const result = document.getElementById("zoneAssessmentResult");
+        const timeInput = document.getElementById("zoneTestTimeInput");
+        const dateInput = document.getElementById("zoneTestDateInput");
+        const effortInput = document.getElementById("zoneTestEffortInput");
+        const maxHeartRateInput = document.getElementById("zoneMaxHeartRateInput");
+        const restingHeartRateInput = document.getElementById("zoneRestingHeartRateInput");
+
+        if (!profile?.test3kSeconds) {
+          result.classList.add("hidden");
+          return;
+        }
+
+        timeInput.value = formatTimer(profile.test3kSeconds);
+        dateInput.value = profile.testedAt || "";
+        effortInput.checked = true;
+        maxHeartRateInput.value = profile.maxHeartRate || "";
+        restingHeartRateInput.value = profile.restingHeartRate || "";
+        document.getElementById("zoneTestPace").textContent = formatPaceSeconds(profile.test3kSeconds / 3);
+        document.getElementById("zoneAssessmentDate").textContent = profile.testedAt
+          ? new Date(profile.testedAt + "T12:00:00").toLocaleDateString("pt-BR")
+          : "Data não informada";
+        const heartRateZones = calculateHeartRateZones(Number(profile.maxHeartRate), Number(profile.restingHeartRate));
+        document.getElementById("zoneAssessmentList").innerHTML = calculatePaceZones(profile.test3kSeconds)
+          .map((item, index) => {
+            const heartRate = heartRateZones ? heartRateZones[index].minimumBpm + " - " + heartRateZones[index].maximumBpm + " bpm" : "BPM não informado";
+            return "<div class=\"zone-row\"><b>" + item.zone + "</b><div><strong>" + item.label + "</strong><span>Pace: " + formatPaceSeconds(item.fasterPaceSeconds) + " - " + formatPaceSeconds(item.slowerPaceSeconds) + "</span><span>FC: " + heartRate + "</span></div></div>";
+          })
+          .join("");
+        result.classList.remove("hidden");
+      }
+
       function formatDurationRange(minMinutes, maxMinutes) {
         if (!Number.isFinite(minMinutes) || !Number.isFinite(maxMinutes)) return "--";
         const format = (minutesValue) => {
@@ -1704,6 +1991,48 @@
           : null;
 
         return { distanceKm, paceRange, estimatedMinutesRange };
+      }
+
+      function normalizeText(value) {
+        return String(value || "").toLowerCase();
+      }
+
+      function normalizeWorkoutType(value) {
+        const type = normalizeText(value);
+        if (type.includes("fartlek")) return "Fartlek";
+        if (type.includes("interval") || type.includes("tiro")) return "Treino Intervalado (Tiros)";
+        if (type.includes("long")) return "Longão";
+        if (type.includes("progress")) return "Treino Progressivo";
+        if (type.includes("tempo") || type.includes("ritmo") || type.includes("pace alvo")) return "Treino de Ritmo (Tempo Run)";
+        if (type.includes("regener") || type.includes("recuper")) return "Treino de Recuperação ou Regenerativo";
+        if (type.includes("rodagem") || type.includes("corrida leve") || type === "leve") return "Rodagem Leve (Tiro Curto/Fácil)";
+        return String(value || "Rodagem Leve (Tiro Curto/Fácil)");
+      }
+
+      function inferWorkoutType(workout) {
+        return normalizeWorkoutType(`${workout.title || ""} ${workout.target || ""}`);
+      }
+
+      function inferWorkoutZone(workout) {
+        const text = normalizeText(`${workout.title || ""} ${workout.target || ""}`);
+        if (text.includes("tiro") || text.includes("velocidade")) return "Z4-Z5";
+        if (text.includes("ritmo") || text.includes("pace alvo") || text.includes("tempo run")) return "Z3-Z4";
+        if (text.includes("long") || text.includes("base") || text.includes("leve")) return "Z2";
+        if (text.includes("regener") || text.includes("recuper")) return "Z1-Z2";
+        return workout.intensityZone || workout.zone || "Z2";
+      }
+
+      function workoutTypeLabel(workout) {
+        const importedType = workout.type || workout.workoutType || workout.trainingType;
+        return importedType ? normalizeWorkoutType(importedType) : inferWorkoutType(workout);
+      }
+
+      function workoutZoneLabel(workout) {
+        return workout.intensityZone || workout.zone || inferWorkoutZone(workout);
+      }
+
+      function segmentZoneLabel(segment, workout) {
+        return segment.intensityZone || segment.zone || workoutZoneLabel(workout);
       }
 
       function segmentKey(segment) {
@@ -1881,6 +2210,8 @@
 
           week.workouts.forEach((workout) => {
             const completed = hasResult(workout.id);
+            const personalGuidance = personalZoneGuidance(workoutZoneLabel(workout));
+            const personalGuidanceMarkup = personalGuidance ? "<p class=\"plan-card-guidance\">Referência pessoal: " + personalGuidance + "</p>" : "";
             const button = document.createElement("button");
             button.type = "button";
             button.className = "card";
@@ -1888,9 +2219,11 @@
               <div class="card-row">
                 <div>
                   <h3>${workout.day} - ${workout.title}</h3>
-                  <p class="muted">${workout.target || ""} - ${totalPlannedMinutes(workout)} min</p>
+                  <p class="muted plan-card-subtitle">${workout.target || "Sem subtítulo"} - ${totalPlannedMinutes(workout)} min</p>
+                  <p class="muted plan-card-meta">${workoutTypeLabel(workout)} - ${workoutZoneLabel(workout)}</p>
+                  ${personalGuidanceMarkup}
                 </div>
-                <span class="pill ${completed ? "done" : ""}">${completed ? "Concluido" : "Planejado"}</span>
+                <span class="pill ${completed ? "done" : ""}">${completed ? "Concluído" : "Planejado"}</span>
               </div>
             `;
             button.addEventListener("click", () => {
@@ -1915,6 +2248,7 @@
           document.getElementById("runnerStepLabel").textContent = "0/0";
           document.getElementById("runnerSegmentName").textContent = "Selecione um treino";
           document.getElementById("runnerSegmentNote").textContent = "Abra um treino no plano ou inicie pelo dashboard.";
+          document.getElementById("runnerZoneGuidance").classList.add("hidden");
           document.getElementById("runnerTimer").textContent = "00:00";
           document.getElementById("runnerSpeed").textContent = "--";
           document.getElementById("runnerPace").textContent = "--";
@@ -1925,7 +2259,7 @@
           document.getElementById("runnerProgress").style.width = "0%";
           applyRunnerMode();
           document.getElementById("runnerRoundLabel").classList.add("hidden");
-          document.getElementById("runnerSequenceList").innerHTML = '<div class="empty">Selecione um treino para ver a sequencia.</div>';
+          document.getElementById("runnerSequenceList").innerHTML = '<div class="empty">Selecione um treino para ver a sequência.</div>';
           return;
         }
 
@@ -1935,8 +2269,12 @@
         const percent = Math.min(100, Math.round((elapsedInSegment / duration) * 100));
         document.getElementById("runnerWorkoutLabel").textContent = workout.title;
         document.getElementById("runnerStepLabel").textContent = `${activeSegmentIndex + 1}/${workout.segments.length}`;
-        document.getElementById("runnerSegmentName").textContent = segment.name;
-        document.getElementById("runnerSegmentNote").textContent = segment.note || workout.target || "";
+        document.getElementById("runnerSegmentName").textContent = workoutTypeLabel(workout);
+        document.getElementById("runnerSegmentNote").textContent = segment.name + " • " + segmentZoneLabel(segment, workout);
+        const runnerGuidance = personalZoneGuidance(segmentZoneLabel(segment, workout));
+        const runnerGuidanceElement = document.getElementById("runnerZoneGuidance");
+        runnerGuidanceElement.textContent = runnerGuidance ? "Referência pessoal: " + runnerGuidance : "";
+        runnerGuidanceElement.classList.toggle("hidden", !runnerGuidance);
         document.getElementById("runnerTimer").textContent = formatTimer(Math.max(0, duration - elapsedInSegment));
         document.getElementById("runnerSpeed").textContent = `${Number(segment.speedKmh || 0).toFixed(1)} km/h`;
         document.getElementById("runnerPace").textContent = speedToPace(segment.speedKmh);
@@ -1972,7 +2310,7 @@
         workout.segments.forEach((item, itemIndex) => {
           const step = document.createElement("div");
           step.className = `sequence-step ${itemIndex === activeSegmentIndex ? "active" : ""}`;
-          step.innerHTML = `<span>${itemIndex + 1}</span><div class="sequence-body"><b>${item.name}</b><small>${item.minutes} min - ${Number(item.speedKmh || 0).toFixed(1)} km/h - ${speedToPace(item.speedKmh)}</small></div>`;
+          step.innerHTML = `<span>${itemIndex + 1}</span><div class="sequence-body"><b>${segmentZoneLabel(item, workout)} • ${item.name}</b><small>${item.minutes} min • ${Number(item.speedKmh || 0).toFixed(1)} km/h • ${speedToPace(item.speedKmh)}</small></div>`;
           sequenceList.appendChild(step);
         });
       }
@@ -2021,11 +2359,18 @@
                     {
                       id: "s1-t1",
                       day: "Terça",
-                      title: "Esteira leve",
-                      target: "Base",
+                      title: "Intervalado moderado",
+                      target: "Blocos fortes com recuperação leve",
+                      type: "Treino Intervalado (Tiros)",
+                      intensityZone: "Z3-Z4",
                       targetDistanceKm: 5,
                       paceRangeMinKm: ["6:00", "6:30"],
-                      segments: [{ name: "Corrida leve", minutes: 30, speedKmh: 8.5, note: "Confortavel" }]
+                      segments: [
+                        { name: "Aquecimento", minutes: 10, speedKmh: 7.5, zone: "Z1-Z2", note: "Comece confortável" },
+                        { name: "Bloco moderado 1", minutes: 2, speedKmh: 9.2, zone: "Z3-Z4", note: "Ritmo controlado" },
+                        { name: "Recuperação 1", minutes: 1.5, speedKmh: 7.5, zone: "Z1-Z2", note: "Respire e recupere" },
+                        { name: "Desaquecimento", minutes: 6, speedKmh: 7, zone: "Z1-Z2", note: "Reduza gradualmente" }
+                      ]
                     }
                   ]
                 }
@@ -2048,6 +2393,7 @@
         renderRunner();
         renderHistory();
         renderDataExample();
+        renderZoneAssessment();
       }
 
       function selectWorkout(id) {
@@ -2126,6 +2472,8 @@
               week: workout?.weekTitle || null,
               day: workout?.day || null,
               title: workout?.title || "Treino importado",
+              type: workout ? workoutTypeLabel(workout) : null,
+              intensityZone: workout ? workoutZoneLabel(workout) : null,
               target: workout?.target || null,
               plannedMinutes: workout ? totalPlannedMinutes(workout) : null,
               plannedSegments: workout?.segments || [],
@@ -2202,6 +2550,7 @@
             "",
             `### ${index + 1}. ${item.date} - ${item.title}`,
             `- Semana/dia: ${item.week || "--"} / ${item.day || "--"}`,
+            `- Tipo/zona: ${item.type || "--"} / ${item.intensityZone || "--"}`,
             `- Objetivo: ${item.target || "--"}`,
             `- Resultado: ${item.distanceKm.toFixed(2)} km em ${item.durationMin.toFixed(1)} min (${formatPaceDecimal(item.averagePaceMinKm)})`,
             `- Esforço percebido: ${item.effort}/10`,
@@ -2253,6 +2602,11 @@
               day: workout.day || "Dia livre",
               title: workout.title || `Treino ${workoutIndex + 1}`,
               target: workout.target || "",
+              type: workout.type || workout.workoutType || workout.trainingType || undefined,
+              workoutType: workout.workoutType || undefined,
+              trainingType: workout.trainingType || undefined,
+              intensityZone: workout.intensityZone || workout.zone || undefined,
+              zone: workout.zone || undefined,
               targetDistanceKm: workout.targetDistanceKm !== undefined ? Number(workout.targetDistanceKm) : undefined,
               distanceKm: workout.distanceKm !== undefined ? Number(workout.distanceKm) : undefined,
               paceRangeMinKm: workout.paceRangeMinKm || workout.paceRange || workout.targetPaceRange || undefined,
@@ -2262,6 +2616,8 @@
                 name: String(segment.name),
                 minutes: Number(segment.minutes),
                 speedKmh: Number(segment.speedKmh),
+                zone: segment.zone || segment.intensityZone || undefined,
+                intensityZone: segment.intensityZone || segment.zone || undefined,
                 note: segment.note ? String(segment.note) : ""
               }))
             }))
@@ -2363,6 +2719,7 @@
           state.plan = validateImportedPlan(imported);
           state.results = Array.isArray(imported.results) ? imported.results : [];
           state.activeRun = null;
+          state.zoneProfile = imported.zoneProfile && typeof imported.zoneProfile === "object" ? imported.zoneProfile : state.zoneProfile;
           saveState();
           selectWorkout(findNextWorkout()?.id);
           showDashboardImportStatus("success", "Plano importado", `${state.plan.name} foi carregado com ${allWorkouts().length} treinos.`);
@@ -2390,6 +2747,21 @@
         showToast("Backup exportado");
       });
 
+      document.getElementById("copyJsonExampleButton").addEventListener("click", async () => {
+        const example = document.getElementById("jsonExample");
+        try {
+          await navigator.clipboard.writeText(example.textContent);
+          showToast("JSON modelo copiado");
+        } catch {
+          const selection = window.getSelection();
+          const range = document.createRange();
+          range.selectNodeContents(example);
+          selection.removeAllRanges();
+          selection.addRange(range);
+          showToast("JSON selecionado para cópia");
+        }
+      });
+
       document.getElementById("copyHistoryButton").addEventListener("click", async () => {
         const text = buildHistoryAnalysisText();
         document.getElementById("historyExportText").value = text;
@@ -2407,12 +2779,45 @@
         showToast("Histórico exportado");
       });
 
+      document.getElementById("zoneAssessmentForm").addEventListener("submit", (event) => {
+        event.preventDefault();
+        const test3kSeconds = parseClockSeconds(document.getElementById("zoneTestTimeInput").value);
+        const maxHeartRateValue = document.getElementById("zoneMaxHeartRateInput").value.trim();
+        const restingHeartRateValue = document.getElementById("zoneRestingHeartRateInput").value.trim();
+        const maxHeartRate = maxHeartRateValue ? Number(maxHeartRateValue) : null;
+        const restingHeartRate = restingHeartRateValue ? Number(restingHeartRateValue) : null;
+        if (!test3kSeconds || test3kSeconds < 600 || test3kSeconds > 3600) {
+          showToast("Informe um tempo de 3 km válido");
+          return;
+        }
+        if ((maxHeartRate === null) !== (restingHeartRate === null)) {
+          showToast("Informe FC máxima e repouso, ou deixe ambas vazias");
+          return;
+        }
+        if (maxHeartRate !== null && (!Number.isInteger(maxHeartRate) || !Number.isInteger(restingHeartRate) || maxHeartRate < 120 || maxHeartRate > 240 || restingHeartRate < 30 || restingHeartRate > 120 || maxHeartRate <= restingHeartRate)) {
+          showToast("Confira os valores de frequência cardíaca");
+          return;
+        }
+
+        state.zoneProfile = {
+          test3kSeconds,
+          maxHeartRate,
+          restingHeartRate,
+          testedAt: document.getElementById("zoneTestDateInput").value || null,
+          calculatedAt: new Date().toISOString()
+        };
+        saveState();
+        renderZoneAssessment();
+        showToast("Zonas de pace atualizadas");
+      });
+
       document.getElementById("resetDemoButton").addEventListener("click", () => {
         if (!confirm("Limpar plano e registros salvos neste navegador?")) return;
         stopTimer();
         state.plan = emptyPlan;
         state.results = [];
         state.activeRun = null;
+        state.zoneProfile = null;
         saveState();
         selectWorkout(findNextWorkout()?.id);
         showToast("Dados locais limpos");

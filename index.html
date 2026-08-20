@@ -670,6 +670,17 @@
         line-height: 1.45;
       }
 
+      .zone-test-row {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .zone-test-row input[type="date"] {
+        min-width: 0;
+        padding-inline: 10px;
+        font-size: 14px;
+      }
+
       .check-field {
         display: flex;
         align-items: flex-start;
@@ -788,6 +799,12 @@
       .toast.show {
         opacity: 1;
         transform: translateX(-50%) translateY(0);
+      }
+
+      @media (max-width: 420px) {
+        .zone-test-row {
+          grid-template-columns: 1fr;
+        }
       }
 
       @media (max-width: 380px) {
@@ -1030,10 +1047,10 @@
           </div>
           <form class="form" id="zoneAssessmentForm">
             <p class="muted">Use um teste de 3 km feito em esforço forte e controlado. As faixas são uma referência inicial de pace.</p>
-            <div class="form-row">
+            <div class="form-row zone-test-row">
               <label class="field">
-                <span>Tempo nos 3 km</span>
-                <input id="zoneTestTimeInput" inputmode="numeric" placeholder="18:30" pattern="[0-9]{1,2}:[0-5][0-9]" required />
+                <span>Tempo nos 3 km (min:seg)</span>
+                <input id="zoneTestTimeInput" inputmode="numeric" autocapitalize="off" spellcheck="false" placeholder="18:30" pattern="[0-9]{1,2}:[0-5][0-9]" required />
               </label>
               <label class="field">
                 <span>Data do teste</span>
@@ -1861,6 +1878,11 @@
         const match = String(value || "").trim().match(/^(\d{1,2}):([0-5]\d)$/);
         if (!match) return null;
         return Number(match[1]) * 60 + Number(match[2]);
+      }
+
+      function formatTestTimeInput(value) {
+        const digits = String(value || "").replace(/\D/g, "").slice(0, 4);
+        return digits.length > 2 ? digits.slice(0, 2) + ":" + digits.slice(2) : digits;
       }
 
       function calculatePaceZones(test3kSeconds) {
@@ -2777,6 +2799,11 @@
       document.getElementById("exportHistoryButton").addEventListener("click", () => {
         downloadJson(`running-coach-history-${new Date().toISOString().slice(0, 10)}.json`, buildHistoryAnalysisPayload());
         showToast("Histórico exportado");
+      });
+
+      document.getElementById("zoneTestTimeInput").addEventListener("input", (event) => {
+        const input = event.currentTarget;
+        input.value = formatTestTimeInput(input.value);
       });
 
       document.getElementById("zoneAssessmentForm").addEventListener("submit", (event) => {

@@ -39,8 +39,8 @@ O app deve permitir:
 
 Incluído:
 
-- dashboard com próximo treino, progresso, concluídos, km acumulados e sequência;
-- plano por semanas;
+- dashboard com indicadores compactos, km mensal/anual e quilometragem acumulada por tênis;
+- plano agrupado em semanas recolhíveis, com acesso destacado ao próximo treino;
 - status de treino planejado/concluído;
 - tela de execução com cronômetro, etapa atual, velocidade, pace e progresso;
 - alternância entre modo Esteira e modo Rua na tela de treino;
@@ -49,9 +49,9 @@ Incluído:
 - cronômetro persistido por timestamp para recuperar tempo após bloqueio/reabertura;
 - tentativa de manter a tela ligada durante o treino com Screen Wake Lock quando suportado;
 - controles de iniciar, pausar, continuar, voltar etapa, avançar etapa e finalizar;
-- formulário de resultado com distância, tempo, esforço, dor antes/durante/depois e observações;
+- formulário de resultado com distância, tempo, tênis usado, esforço, dor antes/durante/depois e observações;
 - histórico local;
-- importação de JSON direto na tela inicial e na tela de dados;
+- importação de JSON na tela de dados;
 - exportação de backup JSON;
 - estado inicial sem treinos cadastrados.
 
@@ -90,6 +90,12 @@ O backup exportado possui esta estrutura:
   "plan": {
     "id": "10k-sub60-base",
     "name": "10 km abaixo de 1h",
+    "shoes": [
+      {
+        "id": "daily",
+        "name": "Tênis de rodagem"
+      }
+    ],
     "weeks": [
       {
         "id": "w1",
@@ -100,6 +106,7 @@ O backup exportado possui esta estrutura:
             "day": "Terça",
             "title": "Esteira leve",
             "target": "Base aeróbica",
+            "shoeId": "daily",
             "segments": [
               {
                 "name": "Aquecimento",
@@ -124,6 +131,7 @@ O backup exportado possui esta estrutura:
       "painBefore": 0,
       "painDuring": 0,
       "painAfter": 0,
+      "shoeId": "daily",
       "notes": "Esteira"
     }
   ]
@@ -141,6 +149,16 @@ Exemplo mínimo:
   "plan": {
     "id": "meu-plano",
     "name": "10 km sub 60",
+    "shoes": [
+      {
+        "id": "daily",
+        "name": "Tênis de rodagem"
+      },
+      {
+        "id": "speed",
+        "name": "Tênis de ritmo"
+      }
+    ],
     "weeks": [
       {
         "id": "semana-1",
@@ -153,6 +171,7 @@ Exemplo mínimo:
             "target": "Blocos fortes com recuperação leve",
             "type": "Treino Intervalado (Tiros)",
             "intensityZone": "Z3-Z4",
+            "shoeId": "speed",
             "segments": [
               {
                 "name": "Aquecimento",
@@ -187,6 +206,7 @@ Exemplo mínimo:
 
 Campos opcionais por treino para corrida na rua:
 
+- `shoeId`: identificador do tênis sugerido para o treino. O valor deve existir em `plan.shoes`; no registro é possível confirmar ou trocar o tênis usado;
 - `type`: tipo do treino. Use `Rodagem Leve (Tiro Curto/Fácil)`, `Longão`, `Treino Progressivo`, `Treino Intervalado (Tiros)`, `Fartlek`, `Treino de Ritmo (Tempo Run)` ou `Treino de Recuperação ou Regenerativo`;
 - `intensityZone`: zona principal do treino, como `Z1`, `Z2`, `Z3`, `Z4`, `Z5` ou faixas como `Z3-Z4`;
 - `targetDistanceKm`: distância alvo total do treino em km;
@@ -207,6 +227,7 @@ Regras:
 
 - cada semana precisa ter `workouts`;
 - cada treino precisa ter `segments`;
+- cada item de `shoes` precisa ter `id` único e `name`;
 - cada segmento precisa ter `name`, `minutes` e `speedKmh`;
 - velocidades devem preferencialmente ser multiplos de `0.5 km/h`.
 
@@ -278,7 +299,7 @@ Entregas:
 
 - abrir `index.html` no navegador;
 - iniciar sem treinos cadastrados;
-- importar plano JSON valido pela tela inicial;
+- importar plano JSON válido pela tela de dados;
 - iniciar um treino;
 - avançar/voltar etapas;
 - finalizar treino;

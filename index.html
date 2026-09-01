@@ -801,6 +801,218 @@
         transform: translateX(-50%) translateY(0);
       }
 
+      .dashboard-heading {
+        margin: 4px 0 12px;
+      }
+
+      .dashboard-heading p,
+      .chart-subtitle,
+      .plan-next-panel .muted {
+        margin-top: 4px;
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .dashboard-heading h2 {
+        margin-top: 4px;
+        font-size: 26px;
+      }
+
+      .compact-grid {
+        gap: 8px;
+        margin-top: 0;
+      }
+
+      .compact-grid .metric {
+        min-height: 74px;
+        padding: 11px 12px;
+      }
+
+      .compact-grid .value {
+        margin-top: 5px;
+        font-size: 23px;
+      }
+
+      .plan-next-panel {
+        display: grid;
+        gap: 14px;
+      }
+
+      .plan-next-panel strong {
+        display: block;
+        margin-top: 4px;
+        font-size: 18px;
+      }
+
+      .week-accordion,
+      .data-accordion {
+        overflow: hidden;
+        padding: 0;
+      }
+
+      .week-accordion summary,
+      .data-accordion summary {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 15px 16px;
+        list-style: none;
+        cursor: pointer;
+      }
+
+      .week-accordion summary::-webkit-details-marker,
+      .data-accordion summary::-webkit-details-marker {
+        display: none;
+      }
+
+      .week-accordion summary::after,
+      .data-accordion summary::after {
+        content: "+";
+        margin-left: auto;
+        color: var(--muted);
+        font-size: 20px;
+        line-height: 1;
+      }
+
+      .week-accordion[open] summary::after,
+      .data-accordion[open] summary::after {
+        content: "−";
+      }
+
+      .week-accordion summary > span:first-child,
+      .data-accordion summary > span:first-child {
+        min-width: 0;
+      }
+
+      .week-accordion summary strong,
+      .data-accordion summary strong {
+        display: block;
+        font-size: 16px;
+      }
+
+      .week-accordion summary small,
+      .data-accordion summary small {
+        display: block;
+        margin-top: 3px;
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .week-workouts,
+      .accordion-content {
+        display: grid;
+        gap: 10px;
+        padding: 0 12px 12px;
+      }
+
+      .data-accordion .accordion-content {
+        padding: 0 16px 16px;
+      }
+
+      .data-accordion .accordion-content.guide-list {
+        gap: 0;
+      }
+
+      .distance-chart {
+        height: 154px;
+        display: grid;
+        grid-template-columns: repeat(12, minmax(0, 1fr));
+        align-items: end;
+        gap: 5px;
+        padding-top: 8px;
+      }
+
+      .chart-column {
+        min-width: 0;
+        height: 100%;
+        display: grid;
+        grid-template-rows: 1fr auto;
+        gap: 6px;
+        align-items: end;
+      }
+
+      .chart-bar-track {
+        width: 100%;
+        min-height: 8px;
+        height: 100%;
+        display: flex;
+        align-items: end;
+        overflow: hidden;
+        border-radius: 4px;
+        background: var(--surface-2);
+      }
+
+      .chart-bar {
+        width: 100%;
+        min-height: 3px;
+        border-radius: inherit;
+        background: var(--cyan);
+      }
+
+      .chart-label {
+        color: var(--muted);
+        font-size: 10px;
+        text-align: center;
+        white-space: nowrap;
+      }
+
+      .shoe-list {
+        display: grid;
+        gap: 8px;
+      }
+
+      .shoe-mileage {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 11px 12px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--surface-2);
+      }
+
+      .shoe-mileage strong {
+        min-width: 0;
+        overflow: hidden;
+        font-size: 14px;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .shoe-mileage span {
+        flex: 0 0 auto;
+        color: var(--cyan);
+        font-size: 13px;
+        font-weight: 800;
+      }
+
+      .shoe-options {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
+        gap: 6px;
+      }
+
+      .shoe-option {
+        min-width: 0;
+        min-height: 46px;
+        overflow: hidden;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: #0d1118;
+        color: var(--muted);
+        font-weight: 800;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .shoe-option.active {
+        border-color: var(--orange);
+        background: rgba(255, 107, 53, 0.17);
+        color: var(--text);
+      }
+
       @media (max-width: 420px) {
         .zone-test-row {
           grid-template-columns: 1fr;
@@ -819,6 +1031,10 @@
         .grid,
         .pace-box {
           grid-template-columns: 1fr;
+        }
+
+        .compact-grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
         }
 
         .tab {
@@ -849,31 +1065,12 @@
       </header>
 
       <section class="section active" id="dashboard">
-        <div class="hero">
-          <div>
-            <p id="activePlanLabel">Plano ativo</p>
-            <h2 id="nextWorkoutTitle">Próximo treino</h2>
-          </div>
-          <button class="primary wide" type="button" id="startNextButton">Iniciar treino</button>
+        <div class="dashboard-heading">
+          <p id="activePlanLabel">Nenhum plano importado</p>
+          <h2 id="dashboardTitle">Seu acompanhamento</h2>
         </div>
 
-        <div class="panel" id="dashboardImportPanel">
-          <div class="panel-title">
-            <h2>Importar plano</h2>
-            <span class="pill">JSON</span>
-          </div>
-          <div class="import-box" id="dashboardImportControls">
-            <input type="file" id="dashboardImportFile" accept="application/json,.json" />
-            <button class="primary" type="button" id="dashboardImportButton">Importar JSON</button>
-          </div>
-          <div class="import-status hidden" id="dashboardImportStatus">
-            <strong id="dashboardImportStatusTitle"></strong>
-            <p class="muted" id="dashboardImportStatusMessage"></p>
-            <button class="secondary" type="button" id="dashboardImportRetryButton">Importar outro JSON</button>
-          </div>
-        </div>
-
-        <div class="grid">
+        <div class="grid compact-grid">
           <div class="metric">
             <div class="label">Progresso</div>
             <div class="value" id="planProgress">0%</div>
@@ -892,12 +1089,38 @@
           </div>
         </div>
 
+        <div class="panel">
+          <div class="panel-title">
+            <div>
+              <h2>Quilometragem</h2>
+              <p class="chart-subtitle">Ano atual</p>
+            </div>
+            <span class="pill" id="annualKm">0,0 km</span>
+          </div>
+          <div class="distance-chart" id="monthlyDistanceChart" aria-label="Quilometragem mensal"></div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-title">
+            <h2>Tênis</h2>
+            <span class="pill" id="shoeSummary">0 km</span>
+          </div>
+          <div class="shoe-list" id="shoeMileageList"></div>
+        </div>
       </section>
 
       <section class="section" id="plan">
         <div class="panel-title">
           <h2>Plano</h2>
           <span class="pill" id="planCount">0 treinos</span>
+        </div>
+        <div class="panel plan-next-panel">
+          <div>
+            <div class="label">Próximo treino</div>
+            <strong id="planNextWorkoutTitle">Importe um plano para começar</strong>
+            <p class="muted" id="planNextWorkoutMeta"></p>
+          </div>
+          <button class="primary wide" type="button" id="startNextButton">Iniciar próximo treino</button>
         </div>
         <div class="stack" id="weekList"></div>
       </section>
@@ -915,8 +1138,9 @@
             </div>
             <div style="height: 14px"></div>
             <div class="stage-name" id="runnerSegmentName">Selecione um treino</div>
-            <p class="muted" id="runnerSegmentNote">Abra um treino no plano ou inicie pelo dashboard.</p>
+            <p class="muted" id="runnerSegmentNote">Abra um treino no Plano.</p>
             <p class="runner-zone-guidance hidden" id="runnerZoneGuidance"></p>
+            <p class="runner-zone-guidance hidden" id="runnerShoeGuidance"></p>
           </div>
 
           <div class="metric-panel" id="treadmillMetricsPanel">
@@ -984,6 +1208,11 @@
                 <input id="durationInput" inputmode="decimal" required />
               </label>
             </div>
+            <div class="field shoe-picker">
+              <span>Tênis usado</span>
+              <input type="hidden" id="resultShoeId" value="" />
+              <div class="shoe-options" id="resultShoeOptions" aria-label="Tênis usado"></div>
+            </div>
             <div class="scale-control" data-scale="effortInput" data-default="5" data-labels='{"1":"leve","5":"moderado","7":"forte","10":"máximo"}'>
               <span>Esforço</span>
               <input type="hidden" id="effortInput" value="5" />
@@ -1040,11 +1269,12 @@
       </section>
 
       <section class="section" id="data">
-        <div class="panel">
-          <div class="panel-title">
-            <h2>Encontrar zonas de pace</h2>
-            <span class="pill">Teste de 3 km</span>
-          </div>
+        <details class="panel data-accordion" id="zoneAssessmentAccordion">
+          <summary>
+            <span><strong>Encontrar zonas de pace</strong><small>Teste de 3 km</small></span>
+            <span class="pill">Zonas</span>
+          </summary>
+          <div class="accordion-content">
           <form class="form" id="zoneAssessmentForm">
             <p class="muted">Use um teste de 3 km feito em esforço forte e controlado. As faixas são uma referência inicial de pace.</p>
             <div class="form-row zone-test-row">
@@ -1084,13 +1314,15 @@
             <div class="zone-list" id="zoneAssessmentList"></div>
             <p class="assessment-note">As faixas de BPM usam FC máxima e FC de repouso informadas. Revise pace e frequência conforme sua percepção, terreno e evolução; elas não substituem avaliação profissional.</p>
           </div>
-        </div>
-
-        <div class="panel">
-          <div class="panel-title">
-            <h2>Categorias de treino</h2>
           </div>
-          <div class="guide-list">
+        </details>
+
+        <details class="panel data-accordion">
+          <summary>
+            <span><strong>Categorias de treino</strong><small>Objetivo de cada sessão</small></span>
+            <span class="pill">Guia</span>
+          </summary>
+          <div class="accordion-content guide-list">
             <div class="guide-item"><strong>Rodagem Leve (Tiro Curto/Fácil)</strong><p>Ritmo confortável para construir base aeróbica e acumular volume.</p></div>
             <div class="guide-item"><strong>Longão</strong><p>Corrida mais longa da semana, feita com controle para desenvolver resistência.</p></div>
             <div class="guide-item"><strong>Treino Progressivo</strong><p>Começa leve e aumenta o ritmo gradualmente até um final firme.</p></div>
@@ -1099,28 +1331,35 @@
             <div class="guide-item"><strong>Treino de Ritmo (Tempo Run)</strong><p>Esforço contínuo e forte controlado, próximo ao ritmo sustentável de limiar.</p></div>
             <div class="guide-item"><strong>Treino de Recuperação ou Regenerativo</strong><p>Corrida bem leve para facilitar a recuperação entre sessões exigentes.</p></div>
           </div>
-        </div>
+        </details>
 
-        <div class="panel">
-          <div class="panel-title">
-            <h2>Zonas de intensidade</h2>
-          </div>
-          <div class="guide-list">
+        <details class="panel data-accordion">
+          <summary>
+            <span><strong>Zonas de intensidade</strong><small>Percepção de esforço</small></span>
+            <span class="pill">Z1-Z5</span>
+          </summary>
+          <div class="accordion-content guide-list">
             <div class="guide-item"><strong>Z1 - Recuperação</strong><p>Muito leve; a conversa é fácil e o foco é recuperar.</p></div>
             <div class="guide-item"><strong>Z2 - Aeróbica</strong><p>Leve e sustentável; base principal para rodagem e longão.</p></div>
             <div class="guide-item"><strong>Z3 - Moderada</strong><p>Constante e mais exigente; fala curta, mas ainda controlada.</p></div>
             <div class="guide-item"><strong>Z4 - Limiar</strong><p>Forte controlada; usada em treinos de ritmo e tempo run.</p></div>
             <div class="guide-item"><strong>Z5 - Alta intensidade</strong><p>Muito forte; usada em tiros curtos, com recuperação adequada.</p></div>
           </div>
-        </div>
+        </details>
+
         <div class="panel">
           <div class="panel-title">
-            <h2>Dados</h2>
+            <h2>Plano e backup</h2>
           </div>
-          <div class="import-box">
+          <div class="import-box" id="dataImportControls">
             <input type="file" id="importFile" accept="application/json,.json" />
-            <button class="primary" type="button" id="importButton">Importar JSON</button>
+            <button class="primary" type="button" id="importButton">Importar plano JSON</button>
             <button class="secondary" type="button" id="exportButton">Exportar backup JSON</button>
+          </div>
+          <div class="import-status hidden" id="dataImportStatus">
+            <strong id="dataImportStatusTitle"></strong>
+            <p class="muted" id="dataImportStatusMessage"></p>
+            <button class="secondary" type="button" id="dataImportRetryButton">Importar outro JSON</button>
           </div>
         </div>
 
@@ -1163,7 +1402,7 @@
 
     <script>
       const STORAGE_KEY = "running-coach-static-v2";
-      const emptyPlan = { id: "empty", name: "", weeks: [] };
+      const emptyPlan = { id: "empty", name: "", shoes: [], weeks: [] };
 
       const demoPlan = {
         id: "10k-sub60-12-weeks",
@@ -1714,7 +1953,7 @@
 
       function allWorkouts() {
         return (state.plan.weeks || []).flatMap((week) =>
-          (week.workouts || []).map((workout) => ({ ...workout, weekTitle: week.title }))
+          (week.workouts || []).map((workout) => ({ ...workout, weekId: week.id, weekTitle: week.title }))
         );
       }
 
@@ -1727,7 +1966,7 @@
       }
 
       function findNextWorkout() {
-        return allWorkouts().find((workout) => !hasResult(workout.id)) || allWorkouts()[0];
+        return allWorkouts().find((workout) => !hasResult(workout.id)) || null;
       }
 
       function totalPlannedMinutes(workout) {
@@ -1935,6 +2174,7 @@
       }
       function renderZoneAssessment() {
         const profile = state.zoneProfile;
+        document.getElementById("zoneAssessmentAccordion").open = !profile?.test3kSeconds;
         const result = document.getElementById("zoneAssessmentResult");
         const timeInput = document.getElementById("zoneTestTimeInput");
         const dateInput = document.getElementById("zoneTestDateInput");
@@ -2123,20 +2363,20 @@
         window.setTimeout(() => toast.classList.remove("show"), 2200);
       }
 
-      function showDashboardImportStatus(type, title, message) {
-        const controls = document.getElementById("dashboardImportControls");
-        const status = document.getElementById("dashboardImportStatus");
+      function showImportStatus(type, title, message) {
+        const controls = document.getElementById("dataImportControls");
+        const status = document.getElementById("dataImportStatus");
         controls.classList.add("hidden");
         status.classList.remove("hidden", "success", "error");
         status.classList.add(type);
-        document.getElementById("dashboardImportStatusTitle").textContent = title;
-        document.getElementById("dashboardImportStatusMessage").textContent = message;
+        document.getElementById("dataImportStatusTitle").textContent = title;
+        document.getElementById("dataImportStatusMessage").textContent = message;
       }
 
-      function resetDashboardImportStatus() {
-        document.getElementById("dashboardImportControls").classList.remove("hidden");
-        document.getElementById("dashboardImportStatus").classList.add("hidden");
-        document.getElementById("dashboardImportFile").value = "";
+      function resetImportStatus() {
+        document.getElementById("dataImportControls").classList.remove("hidden");
+        document.getElementById("dataImportStatus").classList.add("hidden");
+        document.getElementById("importFile").value = "";
       }
 
       function applyRunnerMode() {
@@ -2201,59 +2441,145 @@
       function renderDashboard() {
         const workouts = allWorkouts();
         const done = state.results.length;
-        const next = findNextWorkout();
         const totalKm = state.results.reduce((sum, result) => sum + Number(result.distanceKm || 0), 0);
         const progress = workouts.length ? Math.round((done / workouts.length) * 100) : 0;
+        const currentYear = new Date().getFullYear();
+        const monthLabels = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
+        const monthlyKm = Array.from({ length: 12 }, () => 0);
 
         document.getElementById("activePlanLabel").textContent = state.plan.name || "Nenhum plano importado";
-        document.getElementById("nextWorkoutTitle").textContent = next ? next.title : "Importe seu plano";
-        document.getElementById("planProgress").textContent = `${progress}%`;
-        document.getElementById("doneCount").textContent = `${done}/${workouts.length}`;
-        document.getElementById("totalKm").textContent = totalKm.toFixed(1);
+        document.getElementById("dashboardTitle").textContent = state.plan.name ? "Seu acompanhamento" : "Importe um plano em Dados";
+        document.getElementById("planProgress").textContent = progress + "%";
+        document.getElementById("doneCount").textContent = done + "/" + workouts.length;
+        document.getElementById("totalKm").textContent = formatKilometers(totalKm);
         document.getElementById("streakCount").textContent = String(calculateStreak());
-        document.getElementById("startNextButton").disabled = !next;
+
+        state.results.forEach((result) => {
+          const completedAt = new Date(result.completedAt);
+          if (!Number.isNaN(completedAt.getTime()) && completedAt.getFullYear() === currentYear) {
+            monthlyKm[completedAt.getMonth()] += Number(result.distanceKm || 0);
+          }
+        });
+
+        const annualKm = monthlyKm.reduce((sum, value) => sum + value, 0);
+        const maximumMonthlyKm = Math.max(...monthlyKm, 1);
+        document.getElementById("annualKm").textContent = formatKilometers(annualKm) + " km";
+        document.getElementById("monthlyDistanceChart").innerHTML = monthlyKm
+          .map((value, index) => {
+            const height = Math.max(value ? 8 : 3, Math.round((value / maximumMonthlyKm) * 100));
+            return '<div class="chart-column" title="' + monthLabels[index] + ": " + formatKilometers(value) + ' km"><div class="chart-bar-track"><div class="chart-bar" style="height: ' + height + '%"></div></div><span class="chart-label">' + monthLabels[index] + "</span></div>";
+          })
+          .join("");
+
+        const shoes = getPlanShoes();
+        const shoeTotals = new Map(shoes.map((shoe) => [shoe.id, 0]));
+        let unknownKm = 0;
+        state.results.forEach((result) => {
+          const distance = Number(result.distanceKm || 0);
+          if (result.shoeId && shoeTotals.has(result.shoeId)) {
+            shoeTotals.set(result.shoeId, shoeTotals.get(result.shoeId) + distance);
+          } else {
+            unknownKm += distance;
+          }
+        });
+
+        const shoeList = document.getElementById("shoeMileageList");
+        const entries = shoes.map((shoe) => ({ name: shoe.name, distanceKm: shoeTotals.get(shoe.id) || 0 }));
+        shoeList.innerHTML = "";
+        if (unknownKm > 0 || !entries.length) entries.push({ name: "Não informado", distanceKm: unknownKm });
+        entries.forEach((entry) => {
+          const item = document.createElement("div");
+          const name = document.createElement("strong");
+          const distance = document.createElement("span");
+          item.className = "shoe-mileage";
+          name.textContent = entry.name;
+          distance.textContent = formatKilometers(entry.distanceKm) + " km";
+          item.append(name, distance);
+          shoeList.appendChild(item);
+        });
+        document.getElementById("shoeSummary").textContent = formatKilometers(totalKm) + " km";
+      }
+
+      function formatKilometers(value) {
+        return Number(value || 0).toLocaleString("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+      }
+
+      function getPlanShoes() {
+        return Array.isArray(state.plan.shoes) ? state.plan.shoes : [];
+      }
+
+      function shoeNameForId(shoeId) {
+        return getPlanShoes().find((shoe) => shoe.id === shoeId)?.name || "Não informado";
+      }
+
+      function renderShoeOptions(preferredShoeId) {
+        const input = document.getElementById("resultShoeId");
+        const container = document.getElementById("resultShoeOptions");
+        const shoes = getPlanShoes();
+        const selectedId = shoes.some((shoe) => shoe.id === preferredShoeId) ? preferredShoeId : "";
+        input.value = selectedId;
+        container.innerHTML = "";
+
+        [...shoes, { id: "", name: "Não informado" }].forEach((shoe) => {
+          const button = document.createElement("button");
+          button.type = "button";
+          button.className = "shoe-option";
+          button.textContent = shoe.name;
+          button.classList.toggle("active", shoe.id === selectedId);
+          button.addEventListener("click", () => {
+            input.value = shoe.id;
+            container.querySelectorAll(".shoe-option").forEach((option) => option.classList.remove("active"));
+            button.classList.add("active");
+          });
+          container.appendChild(button);
+        });
       }
 
       function renderPlan() {
         const list = document.getElementById("weekList");
+        const workouts = allWorkouts();
+        const next = findNextWorkout();
+        const nextButton = document.getElementById("startNextButton");
         list.innerHTML = "";
-        document.getElementById("planCount").textContent = `${allWorkouts().length} treinos`;
+        document.getElementById("planCount").textContent = workouts.length + " treinos";
+        document.getElementById("planNextWorkoutTitle").textContent = next ? next.day + " - " + next.title : workouts.length ? "Plano concluído" : "Importe um plano para começar";
+        document.getElementById("planNextWorkoutMeta").textContent = next ? workoutTypeLabel(next) + " • " + workoutZoneLabel(next) : "";
+        nextButton.disabled = !next;
 
-        if (!allWorkouts().length) {
-          list.innerHTML = '<div class="empty">Importe um plano JSON na tela inicial para visualizar as semanas.</div>';
+        if (!workouts.length) {
+          list.innerHTML = '<div class="empty">Importe um plano JSON na tela Dados para visualizar as semanas.</div>';
           return;
         }
 
         state.plan.weeks.forEach((week) => {
-          const title = document.createElement("div");
-          title.className = "label";
-          title.textContent = week.title;
-          list.appendChild(title);
+          const weekWorkouts = week.workouts || [];
+          const completedCount = weekWorkouts.filter((workout) => hasResult(workout.id)).length;
+          const details = document.createElement("details");
+          const summary = document.createElement("summary");
+          const content = document.createElement("div");
+          details.className = "panel week-accordion";
+          details.open = Boolean(next && week.id === next.weekId);
+          summary.innerHTML = '<span><strong>' + week.title + "</strong><small>" + completedCount + "/" + weekWorkouts.length + ' concluídos</small></span><span class="pill ' + (completedCount === weekWorkouts.length ? "done" : "") + '">' + (completedCount === weekWorkouts.length ? "Concluída" : "Em andamento") + "</span>";
+          content.className = "week-workouts";
 
-          week.workouts.forEach((workout) => {
+          weekWorkouts.forEach((workout) => {
             const completed = hasResult(workout.id);
             const personalGuidance = personalZoneGuidance(workoutZoneLabel(workout));
             const personalGuidanceMarkup = personalGuidance ? "<p class=\"plan-card-guidance\">Referência pessoal: " + personalGuidance + "</p>" : "";
+            const shoe = workout.shoeId ? getPlanShoes().find((item) => item.id === workout.shoeId) : null;
+            const shoeMarkup = shoe ? '<p class="muted plan-card-meta">Tênis sugerido: ' + shoe.name + "</p>" : "";
             const button = document.createElement("button");
             button.type = "button";
             button.className = "card";
-            button.innerHTML = `
-              <div class="card-row">
-                <div>
-                  <h3>${workout.day} - ${workout.title}</h3>
-                  <p class="muted plan-card-subtitle">${workout.target || "Sem subtítulo"} - ${totalPlannedMinutes(workout)} min</p>
-                  <p class="muted plan-card-meta">${workoutTypeLabel(workout)} - ${workoutZoneLabel(workout)}</p>
-                  ${personalGuidanceMarkup}
-                </div>
-                <span class="pill ${completed ? "done" : ""}">${completed ? "Concluído" : "Planejado"}</span>
-              </div>
-            `;
+            button.innerHTML = '<div class="card-row"><div><h3>' + workout.day + " - " + workout.title + '</h3><p class="muted plan-card-subtitle">' + (workout.target || "Sem subtítulo") + " - " + totalPlannedMinutes(workout) + ' min</p><p class="muted plan-card-meta">' + workoutTypeLabel(workout) + " - " + workoutZoneLabel(workout) + "</p>" + shoeMarkup + personalGuidanceMarkup + '</div><span class="pill ' + (completed ? "done" : "") + '">' + (completed ? "Concluído" : "Planejado") + "</span></div>";
             button.addEventListener("click", () => {
               selectWorkout(workout.id);
               showTab("workout");
             });
-            list.appendChild(button);
+            content.appendChild(button);
           });
+          details.append(summary, content);
+          list.appendChild(details);
         });
       }
 
@@ -2269,8 +2595,9 @@
           document.getElementById("runnerWorkoutLabel").textContent = "Treino";
           document.getElementById("runnerStepLabel").textContent = "0/0";
           document.getElementById("runnerSegmentName").textContent = "Selecione um treino";
-          document.getElementById("runnerSegmentNote").textContent = "Abra um treino no plano ou inicie pelo dashboard.";
+          document.getElementById("runnerSegmentNote").textContent = "Abra um treino no Plano.";
           document.getElementById("runnerZoneGuidance").classList.add("hidden");
+          document.getElementById("runnerShoeGuidance").classList.add("hidden");
           document.getElementById("runnerTimer").textContent = "00:00";
           document.getElementById("runnerSpeed").textContent = "--";
           document.getElementById("runnerPace").textContent = "--";
@@ -2297,6 +2624,10 @@
         const runnerGuidanceElement = document.getElementById("runnerZoneGuidance");
         runnerGuidanceElement.textContent = runnerGuidance ? "Referência pessoal: " + runnerGuidance : "";
         runnerGuidanceElement.classList.toggle("hidden", !runnerGuidance);
+        const runnerShoe = workout.shoeId ? getPlanShoes().find((shoe) => shoe.id === workout.shoeId) : null;
+        const runnerShoeGuidance = document.getElementById("runnerShoeGuidance");
+        runnerShoeGuidance.textContent = runnerShoe ? "Tênis sugerido: " + runnerShoe.name : "";
+        runnerShoeGuidance.classList.toggle("hidden", !runnerShoe);
         document.getElementById("runnerTimer").textContent = formatTimer(Math.max(0, duration - elapsedInSegment));
         document.getElementById("runnerSpeed").textContent = `${Number(segment.speedKmh || 0).toFixed(1)} km/h`;
         document.getElementById("runnerPace").textContent = speedToPace(segment.speedKmh);
@@ -2361,6 +2692,7 @@
               </div>
               <span class="pill done">RPE ${result.effort}</span>
             </div>
+            <p class="muted" style="margin-top: 8px">Tênis: ${shoeNameForId(result.shoeId)}</p>
             ${result.notes ? `<p class="muted" style="margin-top: 8px">${result.notes}</p>` : ""}
           `;
           list.appendChild(card);
@@ -2373,6 +2705,10 @@
             plan: {
               id: "meu-plano",
               name: "10 km sub 60",
+              shoes: [
+                { id: "daily", name: "Tênis de rodagem" },
+                { id: "speed", name: "Tênis de ritmo" }
+              ],
               weeks: [
                 {
                   id: "semana-1",
@@ -2385,6 +2721,7 @@
                       target: "Blocos fortes com recuperação leve",
                       type: "Treino Intervalado (Tiros)",
                       intensityZone: "Z3-Z4",
+                      shoeId: "speed",
                       targetDistanceKm: 5,
                       paceRangeMinKm: ["6:00", "6:30"],
                       segments: [
@@ -2471,6 +2808,7 @@
           document.getElementById("durationInput").value = String(totalPlannedMinutes(workout));
           const estimatedKm = workout.segments.reduce((sum, segment) => sum + (Number(segment.speedKmh || 0) * Number(segment.minutes || 0)) / 60, 0);
           document.getElementById("distanceInput").value = estimatedKm.toFixed(2);
+          renderShoeOptions(workout.shoeId || "");
         }
       }
 
@@ -2506,6 +2844,8 @@
               painBefore: Number(result.painBefore || 0),
               painDuring: Number(result.painDuring || 0),
               painAfter: Number(result.painAfter || 0),
+              shoeId: result.shoeId || null,
+              shoe: shoeNameForId(result.shoeId),
               notes: result.notes || ""
             };
           });
@@ -2577,6 +2917,7 @@
             `- Resultado: ${item.distanceKm.toFixed(2)} km em ${item.durationMin.toFixed(1)} min (${formatPaceDecimal(item.averagePaceMinKm)})`,
             `- Esforço percebido: ${item.effort}/10`,
             `- Dor: antes ${item.painBefore}/5, durante ${item.painDuring}/5, depois ${item.painAfter}/5`,
+            `- Tênis: ${item.shoe}`,
             `- Observações: ${item.notes || "--"}`
           );
         });
@@ -2601,10 +2942,21 @@
           throw new Error("JSON precisa conter plan.weeks ou weeks.");
         }
 
+        const shoes = Array.isArray(plan.shoes)
+          ? plan.shoes
+              .filter((shoe) => shoe && shoe.id && shoe.name)
+              .map((shoe) => ({ id: String(shoe.id), name: String(shoe.name) }))
+          : [];
+        const shoeIds = new Set(shoes.map((shoe) => shoe.id));
+        if (shoeIds.size !== shoes.length) throw new Error("Cada tênis precisa ter um id único.");
+
         plan.weeks.forEach((week, weekIndex) => {
           if (!Array.isArray(week.workouts)) throw new Error(`Semana ${weekIndex + 1} sem workouts.`);
           week.workouts.forEach((workout, workoutIndex) => {
             if (!Array.isArray(workout.segments)) throw new Error(`Treino ${workoutIndex + 1} sem segments.`);
+            if (workout.shoeId && !shoeIds.has(String(workout.shoeId))) {
+              throw new Error(`Treino ${workoutIndex + 1} referencia um shoeId não cadastrado.`);
+            }
             workout.segments.forEach((segment, segmentIndex) => {
               if (!segment.name || !segment.minutes || !segment.speedKmh) {
                 throw new Error(`Segmento ${segmentIndex + 1} precisa de name, minutes e speedKmh.`);
@@ -2616,6 +2968,7 @@
         return {
           id: plan.id || `plan-${Date.now()}`,
           name: plan.name || "Plano importado",
+          shoes,
           weeks: plan.weeks.map((week, weekIndex) => ({
             id: week.id || `week-${weekIndex + 1}`,
             title: week.title || `Semana ${weekIndex + 1}`,
@@ -2628,6 +2981,7 @@
               workoutType: workout.workoutType || undefined,
               trainingType: workout.trainingType || undefined,
               intensityZone: workout.intensityZone || workout.zone || undefined,
+              shoeId: workout.shoeId ? String(workout.shoeId) : undefined,
               zone: workout.zone || undefined,
               targetDistanceKm: workout.targetDistanceKm !== undefined ? Number(workout.targetDistanceKm) : undefined,
               distanceKm: workout.distanceKm !== undefined ? Number(workout.distanceKm) : undefined,
@@ -2718,6 +3072,7 @@
           painBefore: Number(document.getElementById("painBeforeInput").value),
           painDuring: Number(document.getElementById("painDuringInput").value),
           painAfter: Number(document.getElementById("painAfterInput").value),
+          shoeId: document.getElementById("resultShoeId").value || null,
           notes: document.getElementById("notesInput").value.trim()
         };
 
@@ -2731,7 +3086,7 @@
 
       async function importPlanFromFile(file) {
         if (!file) {
-          showDashboardImportStatus("error", "Nenhum arquivo selecionado", "Escolha um arquivo JSON para importar o plano.");
+          showImportStatus("error", "Nenhum arquivo selecionado", "Escolha um arquivo JSON para importar o plano.");
           showToast("Escolha um arquivo JSON");
           return;
         }
@@ -2744,21 +3099,17 @@
           state.zoneProfile = imported.zoneProfile && typeof imported.zoneProfile === "object" ? imported.zoneProfile : state.zoneProfile;
           saveState();
           selectWorkout(findNextWorkout()?.id);
-          showDashboardImportStatus("success", "Plano importado", `${state.plan.name} foi carregado com ${allWorkouts().length} treinos.`);
+          showImportStatus("success", "Plano importado", `${state.plan.name} foi carregado com ${allWorkouts().length} treinos.`);
           showToast("Plano importado");
-          showTab("dashboard");
+          showTab("data");
         } catch (error) {
           const message = error.message || "JSON inválido";
-          showDashboardImportStatus("error", "Erro na importação", message);
+          showImportStatus("error", "Erro na importação", message);
           showToast(message);
         }
       }
 
-      document.getElementById("dashboardImportButton").addEventListener("click", () => {
-        importPlanFromFile(document.getElementById("dashboardImportFile").files[0]);
-      });
-
-      document.getElementById("dashboardImportRetryButton").addEventListener("click", resetDashboardImportStatus);
+      document.getElementById("dataImportRetryButton").addEventListener("click", resetImportStatus);
 
       document.getElementById("importButton").addEventListener("click", () => {
         importPlanFromFile(document.getElementById("importFile").files[0]);

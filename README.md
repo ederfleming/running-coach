@@ -50,8 +50,11 @@ Incluído:
 - tentativa de manter a tela ligada durante o treino com Screen Wake Lock quando suportado;
 - controles de iniciar, pausar, continuar, voltar etapa, avançar etapa e finalizar;
 - formulário de resultado com distância, tempo, tênis usado, esforço, dor antes/durante/depois e observações;
-- histórico local;
-- importação de JSON na tela de dados;
+- histórico local com edição de data e métricas registradas;
+- conclusão manual de um treino ou dos treinos pendentes de uma semana, sem criar distância ou tempo fictícios;
+- importação de plano preservando o histórico atual;
+- restauração de backup completo quando o JSON contém `results`;
+- backup automático antes de substituir dados por uma importação;
 - exportação de backup JSON;
 - estado inicial sem treinos cadastrados.
 
@@ -132,15 +135,37 @@ O backup exportado possui esta estrutura:
       "painDuring": 0,
       "painAfter": 0,
       "shoeId": "daily",
+      "shoeName": "Tênis de rodagem",
+      "workoutSnapshot": {
+        "id": "w1-t1",
+        "planId": "10k-sub60-base",
+        "planName": "10 km abaixo de 1h",
+        "weekTitle": "Semana 1",
+        "day": "Terça",
+        "title": "Esteira leve",
+        "type": "Rodagem Leve (Tiro Curto/Fácil)",
+        "intensityZone": "Z2",
+        "plannedMinutes": 35,
+        "shoeId": "daily",
+        "shoeName": "Tênis de rodagem"
+      },
       "notes": "Esteira"
     }
-  ]
+  ],
+  "completedWorkoutIds": ["w1-t2"]
 }
 ```
+
+O `workoutSnapshot` preserva os dados do treino no momento do registro. Assim, a descrição, o plano de origem e o tênis continuam disponíveis no histórico mesmo depois da importação de outro plano. `completedWorkoutIds` guarda apenas conclusões manuais e não cria métricas de distância ou duração.
 
 ## Formato de importação de plano
 
 O app aceita um JSON contendo `plan` ou diretamente o objeto do plano.
+
+- JSON somente com plano: troca o plano e preserva resultados e zonas pessoais;
+- backup com `results`: restaura plano, histórico, conclusões manuais e zonas do arquivo;
+- antes de qualquer substituição, o app baixa automaticamente uma cópia do estado atual;
+- ao atualizar o mesmo plano, mantenha o mesmo `plan.id` e os mesmos IDs dos treinos para preservar as conclusões manuais compatíveis.
 
 Exemplo mínimo:
 
@@ -227,6 +252,7 @@ Regras:
 
 - cada semana precisa ter `workouts`;
 - cada treino precisa ter `segments`;
+- cada treino precisa ter `id` único dentro do plano;
 - cada item de `shoes` precisa ter `id` único e `name`;
 - cada segmento precisa ter `name`, `minutes` e `speedKmh`;
 - velocidades devem preferencialmente ser multiplos de `0.5 km/h`.
@@ -243,7 +269,7 @@ Entregas:
 - testar abertura via WhatsApp, Arquivos e Safari;
 - ajustar tamanho de fonte e botoes em uso real;
 - validar se `localStorage` e suficiente por enquanto;
-- incluir confirmacao antes de sobrescrever plano importado.
+- validar a restauração de backup em Safari e Chrome no iPhone.
 
 ### Fase 2 - PWA simples
 
@@ -304,17 +330,20 @@ Entregas:
 - avançar/voltar etapas;
 - finalizar treino;
 - salvar resultado;
+- editar um resultado salvo;
+- marcar treino passado ou semana como feitos sem criar métricas fictícias;
 - ver resultado no histórico;
 - copiar resumo do histórico para análise no chat;
 - baixar histórico JSON;
+- importar um plano novo sem apagar o histórico;
+- restaurar um backup completo;
 - fechar e abrir novamente mantendo os dados;
 - exportar backup JSON;
-- exportar backup JSON.
 
 ## Próximas decisões
 
 1. Manter HTML estático por enquanto ou evoluir direto para Expo?
 2. O acompanhamento deve ser por plano fechado ou por agenda semanal recorrente?
 3. O histórico deve registrar apenas corrida ou também CrossFit/musculacao desde ja?
-4. O treino concluído pode ser editado depois?
-5. Ao importar novo plano, deve apagar resultados antigos ou manter histórico separado?
+4. O histórico deve permitir excluir um registro, além de editar?
+5. As conclusões manuais precisam aceitar uma observação opcional no futuro?

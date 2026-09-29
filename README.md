@@ -158,6 +158,8 @@ O backup exportado possui esta estrutura:
 
 O `workoutSnapshot` preserva os dados do treino no momento do registro. Assim, a descrição, o plano de origem e o tênis continuam disponíveis no histórico mesmo depois da importação de outro plano. `completedWorkoutIds` guarda apenas conclusões manuais e não cria métricas de distância ou duração.
 
+O resumo e o JSON de histórico incluem instruções de ajuste em `planAdjustment`. Ao gerar uma revisão do plano, mantenha o mesmo `plan.id`, preserve os `workout.id` dos treinos concluídos e altere somente os treinos futuros. Dessa forma, a importação mantém o progresso já registrado.
+
 ## Formato de importação de plano
 
 O app aceita um JSON contendo `plan` ou diretamente o objeto do plano.

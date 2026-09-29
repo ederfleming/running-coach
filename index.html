@@ -3024,6 +3024,9 @@
 
       function buildHistoryAnalysisPayload() {
         const workouts = allWorkouts();
+        const completedWorkoutIds = workouts
+          .filter((workout) => isWorkoutCompleted(workout.id))
+          .map((workout) => String(workout.id));
         const manualCompletions = workouts
           .filter((workout) => isManualCompletion(workout.id) && !hasResult(workout.id))
           .map((workout) => createWorkoutSnapshot(workout));
@@ -3037,6 +3040,7 @@
               completedAt: result.completedAt,
               date: new Date(result.completedAt).toLocaleDateString("pt-BR"),
               workoutId: result.workoutId,
+              planId: workout?.planId || null,
               planName: workout?.planName || null,
               week: workout?.weekTitle || null,
               day: workout?.day || null,
@@ -3073,6 +3077,17 @@
             totalWeeks: state.plan.weeks?.length || 0,
             totalWorkouts: workouts.length
           },
+          planAdjustment: {
+            mode: "update-existing-plan",
+            preservePlanId: state.plan.id || null,
+            preserveCompletedWorkoutIds: completedWorkoutIds,
+            instructions: [
+              "Mantenha o mesmo plan.id ao gerar o plano ajustado.",
+              "Mantenha no novo JSON os treinos concluídos com os mesmos workout.id.",
+              "Ajuste apenas os treinos ainda não concluídos.",
+              "Use IDs novos e únicos somente para treinos realmente adicionados."
+            ]
+          },
           summary: {
             completedWorkouts: workouts.filter((workout) => isWorkoutCompleted(workout.id)).length,
             historyRecords: enrichedResults.length,
@@ -3100,7 +3115,15 @@
           "# Histórico Running Coach",
           "",
           `Plano: ${payload.plan.name || "sem plano importado"}`,
+          `ID do plano: ${payload.plan.id || "--"}`,
           `Exportado em: ${new Date(payload.exportedAt).toLocaleString("pt-BR")}`,
+          "",
+          "## Instruções para ajustar o plano",
+          "- Trate este pedido como atualização do plano existente, não como um plano novo.",
+          `- Mantenha plan.id exatamente como: ${payload.planAdjustment.preservePlanId || "--"}`,
+          `- Preserve estes workout.id já concluídos: ${payload.planAdjustment.preserveCompletedWorkoutIds.join(", ") || "nenhum"}.`,
+          "- Mantenha os treinos concluídos no JSON para que continuem marcados como feitos.",
+          "- Ajuste apenas treinos ainda não concluídos; use IDs novos somente para treinos adicionados.",
           "",
           "## Resumo",
           `- Progresso do plano atual: ${payload.summary.completedWorkouts}/${payload.plan.totalWorkouts}`,
@@ -3113,7 +3136,7 @@
           "",
           "## Treinos marcados como feitos sem métricas",
           payload.manualCompletions.length
-            ? payload.manualCompletions.map((item) => `- ${item.weekTitle || "--"} / ${item.day || "--"}: ${item.title}`).join("\n")
+            ? payload.manualCompletions.map((item) => `- workout.id ${item.id}: ${item.weekTitle || "--"} / ${item.day || "--"} - ${item.title}`).join("\n")
             : "Nenhum treino marcado manualmente.",
           "",
           "## Treinos"
@@ -3128,6 +3151,8 @@
           lines.push(
             "",
             `### ${index + 1}. ${item.date} - ${item.title}`,
+            `- ID do plano: ${item.planId || "--"}`,
+            `- ID do treino: ${item.workoutId || "--"}`,
             `- Plano de origem: ${item.planName || "--"}`,
             `- Semana/dia: ${item.week || "--"} / ${item.day || "--"}`,
             `- Tipo/zona: ${item.type || "--"} / ${item.intensityZone || "--"}`,

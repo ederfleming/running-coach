@@ -49,7 +49,7 @@ Incluído:
 - cronômetro persistido por timestamp para recuperar tempo após bloqueio/reabertura;
 - tentativa de manter a tela ligada durante o treino com Screen Wake Lock quando suportado;
 - controles de iniciar, pausar, continuar, voltar etapa, avançar etapa e finalizar;
-- formulário de resultado com distância, tempo, tênis usado, esforço, dor antes/durante/depois e observações;
+- formulário de resultado com distância, tempo em `hh:mm:ss`, tênis usado, esforço, dor antes/durante/depois e observações;
 - histórico local com edição de data e métricas registradas;
 - conclusão manual de um treino ou dos treinos pendentes de uma semana, sem criar distância ou tempo fictícios;
 - importação de plano preservando o histórico atual;

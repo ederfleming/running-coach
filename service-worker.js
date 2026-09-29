@@ -1,4 +1,4 @@
-const CACHE_NAME = 'running-coach-v23';
+const CACHE_NAME = 'running-coach-v24';
 const ASSETS = ['./', './index.html', './manifest.webmanifest', './icon.svg'];
 
 self.addEventListener('install', (event) => {

@@ -766,6 +766,19 @@
         color: var(--red);
       }
 
+      .app-version {
+        display: flex;
+        justify-content: center;
+        gap: 6px;
+        padding: 2px 0 12px;
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .app-version strong {
+        color: var(--text);
+      }
+
       .hidden {
         display: none !important;
       }
@@ -1395,6 +1408,10 @@
             <pre id="jsonExample" style="white-space: pre-wrap; color: var(--muted); margin: 0; font-size: 12px"></pre>
           </div>
         </div>
+        <div class="app-version" aria-label="Versão carregada">
+          <span>Versão carregada</span>
+          <strong id="appVersion">--</strong>
+        </div>
       </section>
     </main>
 
@@ -1424,6 +1441,7 @@
     <div class="toast" id="toast"></div>
 
     <script>
+      const APP_VERSION = "v26";
       const STORAGE_KEY = "running-coach-static-v2";
       const emptyPlan = { id: "empty", name: "", shoes: [], weeks: [] };
 
@@ -2915,6 +2933,7 @@
       }
 
       function render() {
+        document.getElementById("appVersion").textContent = APP_VERSION;
         document.getElementById("todayLabel").textContent = new Date().toLocaleDateString("pt-BR", {
           weekday: "long",
           day: "2-digit",

@@ -56,6 +56,7 @@ Incluído:
 - restauração de backup completo quando o JSON contém `results`;
 - backup automático antes de substituir dados por uma importação;
 - exportação de backup JSON;
+- versão carregada exibida no rodapé da tela de dados;
 - estado inicial sem treinos cadastrados.
 
 Fora desta versão:

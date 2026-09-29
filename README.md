@@ -49,7 +49,7 @@ Incluído:
 - cronômetro persistido por timestamp para recuperar tempo após bloqueio/reabertura;
 - tentativa de manter a tela ligada durante o treino com Screen Wake Lock quando suportado;
 - controles de iniciar, pausar, continuar, voltar etapa, avançar etapa e finalizar;
-- formulário de resultado com distância, tempo em `hh:mm:ss`, tênis usado, esforço, dor antes/durante/depois e observações;
+- formulário de resultado com status da execução, local Rua/Esteira, distância, tempo em `hh:mm:ss`, tênis usado, prontidão, esforço percebido, sensação, fadiga, frequência cardíaca da Mi Band e observações;
 - histórico local com edição de data e métricas registradas;
 - conclusão manual de um treino ou dos treinos pendentes de uma semana, sem criar distância ou tempo fictícios;
 - importação de plano preservando o histórico atual;
@@ -131,10 +131,14 @@ O backup exportado possui esta estrutura:
       "completedAt": "2026-08-03T00:00:00.000Z",
       "distanceKm": 5,
       "durationMin": 35,
+      "completionStatus": "completed",
+      "trainingEnvironment": "street",
+      "readinessBefore": 4,
       "effort": 5,
-      "painBefore": 0,
-      "painDuring": 0,
-      "painAfter": 0,
+      "feelingAfter": 4,
+      "fatigueAfter": 2,
+      "averageHeartRateBpm": 148,
+      "maxHeartRateBpm": 172,
       "shoeId": "daily",
       "shoeName": "Tênis de rodagem",
       "workoutSnapshot": {
@@ -157,7 +161,7 @@ O backup exportado possui esta estrutura:
 }
 ```
 
-O `workoutSnapshot` preserva os dados do treino no momento do registro. Assim, a descrição, o plano de origem e o tênis continuam disponíveis no histórico mesmo depois da importação de outro plano. `completedWorkoutIds` guarda apenas conclusões manuais e não cria métricas de distância ou duração.
+O `workoutSnapshot` preserva os dados do treino no momento do registro. Assim, a descrição, o plano de origem e o tênis continuam disponíveis no histórico mesmo depois da importação de outro plano. `completedWorkoutIds` guarda apenas conclusões manuais e não cria métricas de distância ou duração. O histórico para análise também calcula a carga da sessão como PSE multiplicada pela duração em minutos e inclui a aderência ao tempo planejado. Dor ou desconforto deve ser descrito em `notes`.
 
 O resumo e o JSON de histórico incluem instruções de ajuste em `planAdjustment`. Ao gerar uma revisão do plano, mantenha o mesmo `plan.id`, preserve os `workout.id` dos treinos concluídos e altere somente os treinos futuros. Dessa forma, a importação mantém o progresso já registrado.
 

@@ -627,6 +627,65 @@
         font-weight: 700;
       }
 
+      .result-section {
+        min-width: 0;
+        display: grid;
+        gap: 12px;
+        margin: 0;
+        padding: 0;
+        border: 0;
+      }
+
+      .result-section + .result-section {
+        margin-top: 4px;
+        padding-top: 16px;
+        border-top: 1px solid var(--line);
+      }
+
+      .result-section legend {
+        margin-bottom: 12px;
+        padding: 0;
+        color: var(--text);
+        font-size: 15px;
+        font-weight: 900;
+      }
+
+      .choice-control {
+        display: grid;
+        gap: 8px;
+      }
+
+      .choice-control > span {
+        color: var(--muted);
+        font-size: 13px;
+        font-weight: 700;
+      }
+
+      .choice-options {
+        display: grid;
+        grid-template-columns: repeat(var(--choice-count), minmax(0, 1fr));
+        gap: 4px;
+        padding: 4px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: #0d1118;
+      }
+
+      .choice-option {
+        min-width: 0;
+        min-height: 44px;
+        border-radius: 6px;
+        background: transparent;
+        color: var(--muted);
+        font-size: 13px;
+        font-weight: 900;
+      }
+
+      .choice-option.active {
+        background: var(--orange);
+        color: #091018;
+      }
+
       .export-preview {
         min-height: 180px;
         font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
@@ -1229,55 +1288,80 @@
             <button class="secondary" type="button" id="resultBackButton">Voltar ao treino</button>
           </div>
           <form class="form" id="resultForm">
-            <label class="field">
-              <span>Data do treino</span>
-              <input id="resultDateInput" type="date" required />
-            </label>
-            <div class="form-row">
+            <fieldset class="result-section">
+              <legend>Execução</legend>
+              <div class="choice-control" data-choice="completionStatusInput" data-default="completed" data-options='{"completed":"Conforme","partial":"Parcial","modified":"Adaptei"}'>
+                <span>Como o treino foi realizado?</span>
+                <input type="hidden" id="completionStatusInput" value="completed" />
+                <div class="choice-options" style="--choice-count: 3" aria-label="Execução do treino"></div>
+              </div>
+              <div class="choice-control" data-choice="trainingEnvironmentInput" data-default="street" data-options='{"street":"Rua","treadmill":"Esteira"}'>
+                <span>Local do treino</span>
+                <input type="hidden" id="trainingEnvironmentInput" value="street" />
+                <div class="choice-options" style="--choice-count: 2" aria-label="Local do treino"></div>
+              </div>
               <label class="field">
-                <span>Distância (km)</span>
-                <input id="distanceInput" inputmode="decimal" required />
+                <span>Data do treino</span>
+                <input id="resultDateInput" type="date" required />
               </label>
-              <label class="field">
-                <span>Tempo (hh:mm:ss)</span>
-                <input id="durationInput" inputmode="numeric" pattern="[0-9]{2}:[0-5][0-9]:[0-5][0-9]" placeholder="00:00:00" autocomplete="off" required />
-              </label>
-            </div>
-            <div class="field shoe-picker">
-              <span>Tênis usado</span>
-              <input type="hidden" id="resultShoeId" value="" />
-              <div class="shoe-options" id="resultShoeOptions" aria-label="Tênis usado"></div>
-            </div>
-            <div class="scale-control" data-scale="effortInput" data-default="5" data-labels='{"1":"leve","5":"moderado","7":"forte","10":"máximo"}'>
-              <span>Esforço</span>
-              <input type="hidden" id="effortInput" value="5" />
-              <div class="scale-options" style="--scale-count: 10" aria-label="Esforço percebido"></div>
-              <div class="scale-caption"></div>
-            </div>
-            <div class="form-row">
-              <div class="field scale-control" data-scale="painBeforeInput" data-default="0" data-labels='{"0":"nenhuma","5":"alta"}'>
-                <span>Dor antes</span>
-                <input type="hidden" id="painBeforeInput" value="0" />
-                <div class="scale-options" style="--scale-count: 6" aria-label="Dor antes"></div>
+              <div class="form-row">
+                <label class="field">
+                  <span>Distância (km)</span>
+                  <input id="distanceInput" inputmode="decimal" required />
+                </label>
+                <label class="field">
+                  <span>Tempo (hh:mm:ss)</span>
+                  <input id="durationInput" inputmode="numeric" pattern="[0-9]{2}:[0-5][0-9]:[0-5][0-9]" placeholder="00:00:00" autocomplete="off" required />
+                </label>
+              </div>
+              <div class="field shoe-picker">
+                <span>Tênis usado</span>
+                <input type="hidden" id="resultShoeId" value="" />
+                <div class="shoe-options" id="resultShoeOptions" aria-label="Tênis usado"></div>
+              </div>
+            </fieldset>
+
+            <fieldset class="result-section">
+              <legend>Resposta ao treino</legend>
+              <div class="scale-control" data-scale="readinessBeforeInput" data-default="3" data-min="1" data-max="5" data-labels='{"1":"muito baixa","3":"normal","5":"ótima"}'>
+                <span>Prontidão antes</span>
+                <input type="hidden" id="readinessBeforeInput" value="3" />
+                <div class="scale-options" style="--scale-count: 5" aria-label="Prontidão antes do treino"></div>
                 <div class="scale-caption"></div>
               </div>
-              <div class="field scale-control" data-scale="painDuringInput" data-default="0" data-labels='{"0":"nenhuma","5":"alta"}'>
-                <span>Dor durante</span>
-                <input type="hidden" id="painDuringInput" value="0" />
-                <div class="scale-options" style="--scale-count: 6" aria-label="Dor durante"></div>
+              <div class="scale-control" data-scale="effortInput" data-default="5" data-min="1" data-max="10" data-labels='{"1":"leve","5":"moderado","7":"forte","10":"máximo"}'>
+                <span>Esforço percebido (PSE)</span>
+                <input type="hidden" id="effortInput" value="5" />
+                <div class="scale-options" style="--scale-count: 10" aria-label="Esforço percebido"></div>
                 <div class="scale-caption"></div>
               </div>
-            </div>
-            <div class="scale-control" data-scale="painAfterInput" data-default="0" data-labels='{"0":"nenhuma","5":"alta"}'>
-              <span>Dor depois</span>
-              <input type="hidden" id="painAfterInput" value="0" />
-              <div class="scale-options" style="--scale-count: 6" aria-label="Dor depois"></div>
-              <div class="scale-caption"></div>
-            </div>
-            <label class="field">
-              <span>Observações</span>
-              <textarea id="notesInput" placeholder="Esteira, rua, sensações, ajustes..."></textarea>
-            </label>
+              <div class="scale-control" data-scale="feelingAfterInput" data-default="3" data-min="1" data-max="5" data-labels='{"1":"muito ruim","3":"normal","5":"ótima"}'>
+                <span>Sensação após</span>
+                <input type="hidden" id="feelingAfterInput" value="3" />
+                <div class="scale-options" style="--scale-count: 5" aria-label="Sensação após o treino"></div>
+                <div class="scale-caption"></div>
+              </div>
+              <div class="scale-control" data-scale="fatigueAfterInput" data-default="2" data-min="0" data-max="5" data-labels='{"0":"nenhuma","2":"leve","3":"moderada","5":"extrema"}'>
+                <span>Fadiga após</span>
+                <input type="hidden" id="fatigueAfterInput" value="2" />
+                <div class="scale-options" style="--scale-count: 6" aria-label="Fadiga após o treino"></div>
+                <div class="scale-caption"></div>
+              </div>
+              <div class="form-row">
+                <label class="field">
+                  <span>FC média (bpm)</span>
+                  <input id="averageHeartRateInput" inputmode="numeric" placeholder="Opcional" />
+                </label>
+                <label class="field">
+                  <span>FC máxima (bpm)</span>
+                  <input id="maxHeartRateResultInput" inputmode="numeric" placeholder="Opcional" />
+                </label>
+              </div>
+              <label class="field">
+                <span>Observações</span>
+                <textarea id="notesInput" placeholder="Sensações, adaptações, dor ou desconforto, clima e percurso..."></textarea>
+              </label>
+            </fieldset>
             <button class="primary wide" type="submit" id="resultSubmitButton">Salvar resultado</button>
           </form>
         </div>
@@ -1441,7 +1525,7 @@
     <div class="toast" id="toast"></div>
 
     <script>
-      const APP_VERSION = "v27";
+      const APP_VERSION = "v28";
       const STORAGE_KEY = "running-coach-static-v2";
       const emptyPlan = { id: "empty", name: "", shoes: [], weeks: [] };
 
@@ -2534,8 +2618,8 @@
           const options = control.querySelector(".scale-options");
           const caption = control.querySelector(".scale-caption");
           const labels = JSON.parse(control.dataset.labels || "{}");
-          const max = control.dataset.scale === "effortInput" ? 10 : 5;
-          const min = control.dataset.scale === "effortInput" ? 1 : 0;
+          const max = Number(control.dataset.max ?? (control.dataset.scale === "effortInput" ? 10 : 5));
+          const min = Number(control.dataset.min ?? (control.dataset.scale === "effortInput" ? 1 : 0));
 
           const selectValue = (value) => {
             input.value = String(value);
@@ -2557,6 +2641,34 @@
           }
 
           selectValue(Number(input.value || control.dataset.default));
+        });
+      }
+
+      function setupChoiceControls() {
+        document.querySelectorAll("[data-choice]").forEach((control) => {
+          const input = document.getElementById(control.dataset.choice);
+          const options = control.querySelector(".choice-options");
+          const choices = JSON.parse(control.dataset.options || "{}");
+
+          const selectValue = (value) => {
+            input.value = value;
+            options.querySelectorAll(".choice-option").forEach((button) => {
+              button.classList.toggle("active", button.dataset.value === value);
+            });
+          };
+
+          options.innerHTML = "";
+          Object.entries(choices).forEach(([value, label]) => {
+            const button = document.createElement("button");
+            button.type = "button";
+            button.className = "choice-option";
+            button.dataset.value = value;
+            button.textContent = label;
+            button.addEventListener("click", () => selectValue(value));
+            options.appendChild(button);
+          });
+
+          selectValue(input.value || control.dataset.default || Object.keys(choices)[0] || "");
         });
       }
 
@@ -2863,6 +2975,9 @@
         [...state.results].reverse().forEach((result) => {
           const workout = workoutDataForResult(result);
           const pace = Number(result.durationMin || 0) / Math.max(0.01, Number(result.distanceKm || 0));
+          const heartRate = result.averageHeartRateBpm || result.maxHeartRateBpm
+            ? ` • FC ${result.averageHeartRateBpm || "--"}/${result.maxHeartRateBpm || "--"} bpm`
+            : "";
           const card = document.createElement("div");
           const actions = document.createElement("div");
           const editButton = document.createElement("button");
@@ -2875,6 +2990,7 @@
               </div>
               <span class="pill done">RPE ${result.effort}</span>
             </div>
+            <p class="muted" style="margin-top: 8px">${escapeHtml(completionStatusLabel(result.completionStatus || "completed"))} • ${escapeHtml(trainingEnvironmentLabel(result.trainingEnvironment))}${heartRate}</p>
             <p class="muted" style="margin-top: 8px">Tênis: ${escapeHtml(shoeNameForResult(result))}</p>
             ${result.notes ? `<p class="muted" style="margin-top: 8px">${escapeHtml(result.notes)}</p>` : ""}
           `;
@@ -3015,10 +3131,14 @@
           document.getElementById("resultDateInput").value = dateInputValue(existingResult.completedAt);
           document.getElementById("distanceInput").value = String(existingResult.distanceKm ?? "");
           document.getElementById("durationInput").value = durationMinutesToTimeInput(existingResult.durationMin);
+          document.getElementById("completionStatusInput").value = existingResult.completionStatus || "completed";
+          document.getElementById("trainingEnvironmentInput").value = existingResult.trainingEnvironment || "street";
+          document.getElementById("readinessBeforeInput").value = String(existingResult.readinessBefore ?? 3);
           document.getElementById("effortInput").value = String(existingResult.effort ?? 5);
-          document.getElementById("painBeforeInput").value = String(existingResult.painBefore ?? 0);
-          document.getElementById("painDuringInput").value = String(existingResult.painDuring ?? 0);
-          document.getElementById("painAfterInput").value = String(existingResult.painAfter ?? 0);
+          document.getElementById("feelingAfterInput").value = String(existingResult.feelingAfter ?? 3);
+          document.getElementById("fatigueAfterInput").value = String(existingResult.fatigueAfter ?? 2);
+          document.getElementById("averageHeartRateInput").value = existingResult.averageHeartRateBpm ?? "";
+          document.getElementById("maxHeartRateResultInput").value = existingResult.maxHeartRateBpm ?? "";
           document.getElementById("notesInput").value = existingResult.notes || "";
           renderShoeOptions(existingResult.shoeId || "", shoeNameForResult(existingResult));
         } else {
@@ -3026,14 +3146,19 @@
           document.getElementById("durationInput").value = durationMinutesToTimeInput(totalPlannedMinutes(workout));
           const estimatedKm = workout.segments.reduce((sum, segment) => sum + (Number(segment.speedKmh || 0) * Number(segment.minutes || 0)) / 60, 0);
           document.getElementById("distanceInput").value = estimatedKm.toFixed(2);
+          document.getElementById("completionStatusInput").value = "completed";
+          document.getElementById("trainingEnvironmentInput").value = runnerMode === "treadmill" ? "treadmill" : "street";
+          document.getElementById("readinessBeforeInput").value = "3";
           document.getElementById("effortInput").value = "5";
-          document.getElementById("painBeforeInput").value = "0";
-          document.getElementById("painDuringInput").value = "0";
-          document.getElementById("painAfterInput").value = "0";
+          document.getElementById("feelingAfterInput").value = "3";
+          document.getElementById("fatigueAfterInput").value = "2";
+          document.getElementById("averageHeartRateInput").value = "";
+          document.getElementById("maxHeartRateResultInput").value = "";
           document.getElementById("notesInput").value = "";
           renderShoeOptions(workout.shoeId || "");
         }
         setupScaleControls();
+        setupChoiceControls();
       }
 
       function calculateStreak() {
@@ -3055,6 +3180,8 @@
             const workout = workoutDataForResult(result);
             const distanceKm = Number(result.distanceKm || 0);
             const durationMin = Number(result.durationMin || 0);
+            const effort = Number(result.effort || 0);
+            const plannedMinutes = Number(workout?.plannedMinutes || 0);
             return {
               completedAt: result.completedAt,
               date: new Date(result.completedAt).toLocaleDateString("pt-BR"),
@@ -3067,15 +3194,24 @@
               type: workout?.type || null,
               intensityZone: workout?.intensityZone || null,
               target: workout?.target || null,
-              plannedMinutes: workout?.plannedMinutes ?? null,
+              plannedMinutes: plannedMinutes || null,
               plannedSegments: workout?.plannedSegments || [],
               distanceKm,
               durationMin,
               averagePaceMinKm: distanceKm > 0 ? Number((durationMin / distanceKm).toFixed(2)) : null,
-              effort: Number(result.effort || 0),
-              painBefore: Number(result.painBefore || 0),
-              painDuring: Number(result.painDuring || 0),
-              painAfter: Number(result.painAfter || 0),
+              completionStatus: result.completionStatus || "completed",
+              trainingEnvironment: result.trainingEnvironment || null,
+              readinessBefore: result.readinessBefore ?? null,
+              effort,
+              feelingAfter: result.feelingAfter ?? null,
+              fatigueAfter: result.fatigueAfter ?? null,
+              averageHeartRateBpm: result.averageHeartRateBpm ?? null,
+              maxHeartRateBpm: result.maxHeartRateBpm ?? null,
+              sessionRpeLoad: Number((effort * durationMin).toFixed(1)),
+              durationAdherencePercent: plannedMinutes > 0 ? Math.round((durationMin / plannedMinutes) * 100) : null,
+              painBefore: result.painBefore ?? null,
+              painDuring: result.painDuring ?? null,
+              painAfter: result.painAfter ?? null,
               shoeId: result.shoeId || null,
               shoe: shoeNameForResult(result),
               notes: result.notes || ""
@@ -3086,6 +3222,9 @@
         const totalDurationMin = enrichedResults.reduce((sum, item) => sum + item.durationMin, 0);
         const averageEffort = enrichedResults.length
           ? enrichedResults.reduce((sum, item) => sum + item.effort, 0) / enrichedResults.length
+          : 0;
+        const averageSessionRpeLoad = enrichedResults.length
+          ? enrichedResults.reduce((sum, item) => sum + item.sessionRpeLoad, 0) / enrichedResults.length
           : 0;
 
         return {
@@ -3114,6 +3253,7 @@
             totalDurationMin: Number(totalDurationMin.toFixed(1)),
             averagePaceMinKm: totalDistanceKm > 0 ? Number((totalDurationMin / totalDistanceKm).toFixed(2)) : null,
             averageEffort: Number(averageEffort.toFixed(1)),
+            averageSessionRpeLoad: Number(averageSessionRpeLoad.toFixed(1)),
             streakDays: calculateStreak()
           },
           manualCompletions,
@@ -3126,6 +3266,14 @@
         const minutes = Math.floor(value);
         const seconds = Math.round((value - minutes) * 60);
         return `${minutes}:${String(seconds).padStart(2, "0")}/km`;
+      }
+
+      function completionStatusLabel(value) {
+        return { completed: "Conforme planejado", partial: "Parcial", modified: "Com adaptações" }[value] || "Não informado";
+      }
+
+      function trainingEnvironmentLabel(value) {
+        return { street: "Rua", treadmill: "Esteira" }[value] || "Não informado";
       }
 
       function buildHistoryAnalysisText() {
@@ -3151,6 +3299,7 @@
           `- Tempo total: ${payload.summary.totalDurationMin} min`,
           `- Pace médio: ${formatPaceDecimal(payload.summary.averagePaceMinKm)}`,
           `- Esforço médio: ${payload.summary.averageEffort}/10`,
+          `- Carga média da sessão (PSE x min): ${payload.summary.averageSessionRpeLoad}`,
           `- Sequência registrada: ${payload.summary.streakDays} dias`,
           "",
           "## Treinos marcados como feitos sem métricas",
@@ -3167,6 +3316,7 @@
         }
 
         payload.results.forEach((item, index) => {
+          const hasLegacyPain = [item.painBefore, item.painDuring, item.painAfter].some((value) => value !== null);
           lines.push(
             "",
             `### ${index + 1}. ${item.date} - ${item.title}`,
@@ -3176,9 +3326,14 @@
             `- Semana/dia: ${item.week || "--"} / ${item.day || "--"}`,
             `- Tipo/zona: ${item.type || "--"} / ${item.intensityZone || "--"}`,
             `- Objetivo: ${item.target || "--"}`,
+            `- Execução: ${completionStatusLabel(item.completionStatus)} • ${trainingEnvironmentLabel(item.trainingEnvironment)}`,
             `- Resultado: ${item.distanceKm.toFixed(2)} km em ${item.durationMin.toFixed(1)} min (${formatPaceDecimal(item.averagePaceMinKm)})`,
             `- Esforço percebido: ${item.effort}/10`,
-            `- Dor: antes ${item.painBefore}/5, durante ${item.painDuring}/5, depois ${item.painAfter}/5`,
+            `- Carga da sessão (PSE x min): ${item.sessionRpeLoad}`,
+            `- Aderência ao tempo planejado: ${item.durationAdherencePercent !== null ? item.durationAdherencePercent + "%" : "--"}`,
+            `- Resposta: prontidão ${item.readinessBefore ?? "--"}/5, sensação ${item.feelingAfter ?? "--"}/5, fadiga ${item.fatigueAfter ?? "--"}/5`,
+            `- Frequência cardíaca: média ${item.averageHeartRateBpm ?? "--"} bpm, máxima ${item.maxHeartRateBpm ?? "--"} bpm`,
+            ...(hasLegacyPain ? [`- Dor (registro antigo): antes ${item.painBefore ?? "--"}/5, durante ${item.painDuring ?? "--"}/5, depois ${item.painAfter ?? "--"}/5`] : []),
             `- Tênis: ${item.shoe}`,
             `- Observações: ${item.notes || "--"}`
           );
@@ -3345,6 +3500,28 @@
           return;
         }
         durationInput.setCustomValidity("");
+        const averageHeartRateInput = document.getElementById("averageHeartRateInput");
+        const maxHeartRateInput = document.getElementById("maxHeartRateResultInput");
+        const averageHeartRateBpm = averageHeartRateInput.value.trim() ? Number(averageHeartRateInput.value) : null;
+        const maxHeartRateBpm = maxHeartRateInput.value.trim() ? Number(maxHeartRateInput.value) : null;
+
+        if (averageHeartRateBpm !== null && (!Number.isInteger(averageHeartRateBpm) || averageHeartRateBpm < 30 || averageHeartRateBpm > 240)) {
+          averageHeartRateInput.setCustomValidity("Informe uma FC média entre 30 e 240 bpm.");
+          averageHeartRateInput.reportValidity();
+          return;
+        }
+        averageHeartRateInput.setCustomValidity("");
+        if (maxHeartRateBpm !== null && (!Number.isInteger(maxHeartRateBpm) || maxHeartRateBpm < 30 || maxHeartRateBpm > 240)) {
+          maxHeartRateInput.setCustomValidity("Informe uma FC máxima entre 30 e 240 bpm.");
+          maxHeartRateInput.reportValidity();
+          return;
+        }
+        if (averageHeartRateBpm !== null && maxHeartRateBpm !== null && averageHeartRateBpm > maxHeartRateBpm) {
+          maxHeartRateInput.setCustomValidity("A FC máxima deve ser maior ou igual à FC média.");
+          maxHeartRateInput.reportValidity();
+          return;
+        }
+        maxHeartRateInput.setCustomValidity("");
 
         const result = {
           ...existingResult,
@@ -3353,10 +3530,14 @@
           completedAt: new Date(resultDate + "T12:00:00").toISOString(),
           distanceKm: Number(String(document.getElementById("distanceInput").value).replace(",", ".")),
           durationMin,
+          completionStatus: document.getElementById("completionStatusInput").value,
+          trainingEnvironment: document.getElementById("trainingEnvironmentInput").value,
+          readinessBefore: Number(document.getElementById("readinessBeforeInput").value),
           effort: Number(document.getElementById("effortInput").value),
-          painBefore: Number(document.getElementById("painBeforeInput").value),
-          painDuring: Number(document.getElementById("painDuringInput").value),
-          painAfter: Number(document.getElementById("painAfterInput").value),
+          feelingAfter: Number(document.getElementById("feelingAfterInput").value),
+          fatigueAfter: Number(document.getElementById("fatigueAfterInput").value),
+          averageHeartRateBpm,
+          maxHeartRateBpm,
           shoeId,
           shoeName: shoeId ? selectedShoe?.textContent || shoeNameForId(shoeId) : null,
           workoutSnapshot: existingResult?.workoutSnapshot || createWorkoutSnapshot(workout),
@@ -3495,6 +3676,12 @@
         }
       });
 
+      ["averageHeartRateInput", "maxHeartRateResultInput"].forEach((inputId) => {
+        document.getElementById(inputId).addEventListener("input", (event) => {
+          event.currentTarget.setCustomValidity("");
+        });
+      });
+
       document.getElementById("zoneAssessmentForm").addEventListener("submit", (event) => {
         event.preventDefault();
         const test3kSeconds = parseClockSeconds(document.getElementById("zoneTestTimeInput").value);
@@ -3564,6 +3751,7 @@
       }
 
       setupScaleControls();
+      setupChoiceControls();
 
       if ("serviceWorker" in navigator && location.protocol !== "file:") {
         let refreshingForUpdate = false;

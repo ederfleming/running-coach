@@ -390,8 +390,9 @@
       }
 
       .stage-name {
-        font-size: 30px;
+        font-size: 24px;
         font-weight: 900;
+        line-height: 1.2;
       }
 
       .runner-info {
@@ -494,7 +495,8 @@
       }
 
       .pace-box .value {
-        font-size: 24px;
+        font-size: 20px;
+        line-height: 1.2;
       }
 
       .mode-toggle {
@@ -621,10 +623,11 @@
       }
 
       .scale-caption {
-        min-height: 18px;
+        min-height: 42px;
         color: var(--muted);
         font-size: 12px;
         font-weight: 700;
+        line-height: 1.45;
       }
 
       .result-section {
@@ -1230,7 +1233,6 @@
             <div class="stage-name" id="runnerSegmentName">Selecione um treino</div>
             <p class="muted" id="runnerSegmentNote">Abra um treino no Plano.</p>
             <p class="runner-zone-guidance hidden" id="runnerZoneGuidance"></p>
-            <p class="runner-zone-guidance hidden" id="runnerShoeGuidance"></p>
           </div>
 
           <div class="metric-panel" id="treadmillMetricsPanel">
@@ -1323,29 +1325,29 @@
 
             <fieldset class="result-section">
               <legend>Resposta ao treino</legend>
-              <div class="scale-control" data-scale="readinessBeforeInput" data-default="3" data-min="1" data-max="5" data-labels='{"1":"muito baixa","3":"normal","5":"ótima"}'>
+              <div class="scale-control" data-scale="readinessBeforeInput" data-default="3" data-min="1" data-max="5" data-labels='{"1":"Muito baixa — Você está sem energia, mal recuperado ou sente que começar o treino já será difícil.","2":"Baixa — Há cansaço, sono ruim ou pouca disposição, mas você acredita que consegue treinar com atenção.","3":"Adequada — Seu corpo está no estado habitual: nem especialmente cansado, nem totalmente descansado.","4":"Boa — Você se sente recuperado, disposto e confiante para cumprir o treino planejado.","5":"Excelente — Energia alta, corpo leve e sensação de recuperação completa para treinar bem."}'>
                 <span>Prontidão antes</span>
                 <input type="hidden" id="readinessBeforeInput" value="3" />
                 <div class="scale-options" style="--scale-count: 5" aria-label="Prontidão antes do treino"></div>
-                <div class="scale-caption"></div>
+                <div class="scale-caption" aria-live="polite"></div>
               </div>
-              <div class="scale-control" data-scale="effortInput" data-default="5" data-min="1" data-max="10" data-labels='{"1":"leve","5":"moderado","7":"forte","10":"máximo"}'>
+              <div class="scale-control" data-scale="effortInput" data-default="5" data-min="1" data-max="10" data-labels='{"1":"Muito leve — Quase nenhum esforço; respiração tranquila e sensação de que poderia continuar por muito tempo.","2":"Leve — Ritmo confortável, conversa fácil e esforço pouco perceptível durante a maior parte do treino.","3":"Leve a moderado — Exige alguma atenção, mas a respiração continua controlada e conversar ainda é fácil.","4":"Moderado — Trabalho perceptível e constante; você conversa em frases completas, sem grande desconforto.","5":"Moderado sustentado — Exige concentração para manter o ritmo, mas ainda parece controlado e repetível.","6":"Moderado a forte — Respiração mais intensa, conversa em frases curtas e necessidade clara de esforço para continuar.","7":"Forte — Treino exigente; falar fica difícil e você precisa se concentrar para sustentar o ritmo.","8":"Muito forte — Esforço alto, desconforto acentuado e ritmo que só pode ser mantido por períodos limitados.","9":"Quase máximo — Muito próximo do seu limite; falar é quase impossível e resta pouca capacidade para acelerar.","10":"Máximo — Esforço total, no seu limite físico daquele momento, impossível de sustentar por muito tempo."}'>
                 <span>Esforço percebido (PSE)</span>
                 <input type="hidden" id="effortInput" value="5" />
                 <div class="scale-options" style="--scale-count: 10" aria-label="Esforço percebido"></div>
-                <div class="scale-caption"></div>
+                <div class="scale-caption" aria-live="polite"></div>
               </div>
-              <div class="scale-control" data-scale="feelingAfterInput" data-default="3" data-min="1" data-max="5" data-labels='{"1":"muito ruim","3":"normal","5":"ótima"}'>
+              <div class="scale-control" data-scale="feelingAfterInput" data-default="3" data-min="1" data-max="5" data-labels='{"1":"Muito ruim — Você terminou indisposto, frustrado ou com uma resposta corporal claramente pior que a esperada.","2":"Ruim — O treino deixou uma sensação negativa, com desconforto ou dificuldade acima do que parecia adequado.","3":"Esperada — Você terminou como imaginava para esse treino, sem sensação especialmente positiva ou negativa.","4":"Boa — Você terminou satisfeito, controlado e com a percepção de que o treino foi bem executado.","5":"Excelente — Você terminou muito bem, confiante e com resposta corporal melhor do que esperava."}'>
                 <span>Sensação após</span>
                 <input type="hidden" id="feelingAfterInput" value="3" />
                 <div class="scale-options" style="--scale-count: 5" aria-label="Sensação após o treino"></div>
-                <div class="scale-caption"></div>
+                <div class="scale-caption" aria-live="polite"></div>
               </div>
-              <div class="scale-control" data-scale="fatigueAfterInput" data-default="2" data-min="0" data-max="5" data-labels='{"0":"nenhuma","2":"leve","3":"moderada","5":"extrema"}'>
+              <div class="scale-control" data-scale="fatigueAfterInput" data-default="2" data-min="0" data-max="5" data-labels='{"0":"Nenhuma — Você terminou sem cansaço relevante e sente que poderia realizar outra atividade normalmente.","1":"Muito leve — Há um pequeno cansaço, mas ele não afeta seus movimentos nem sua disposição após o treino.","2":"Leve — Cansaço perceptível e esperado, com recuperação aparentemente rápida após descansar e se hidratar.","3":"Moderada — Pernas e corpo cansados; você precisa de descanso, mas ainda consegue seguir as atividades do dia.","4":"Alta — Cansaço intenso, pernas pesadas e necessidade clara de recuperação antes de outro esforço.","5":"Extrema — Esgotamento acentuado; você terminou no limite e precisa interromper esforços e priorizar a recuperação."}'>
                 <span>Fadiga após</span>
                 <input type="hidden" id="fatigueAfterInput" value="2" />
                 <div class="scale-options" style="--scale-count: 6" aria-label="Fadiga após o treino"></div>
-                <div class="scale-caption"></div>
+                <div class="scale-caption" aria-live="polite"></div>
               </div>
               <div class="form-row">
                 <label class="field">
@@ -1525,7 +1527,7 @@
     <div class="toast" id="toast"></div>
 
     <script>
-      const APP_VERSION = "v28";
+      const APP_VERSION = "v31";
       const STORAGE_KEY = "running-coach-static-v2";
       const emptyPlan = { id: "empty", name: "", shoes: [], weeks: [] };
 
@@ -2890,7 +2892,6 @@
           document.getElementById("runnerSegmentName").textContent = "Selecione um treino";
           document.getElementById("runnerSegmentNote").textContent = "Abra um treino no Plano.";
           document.getElementById("runnerZoneGuidance").classList.add("hidden");
-          document.getElementById("runnerShoeGuidance").classList.add("hidden");
           document.getElementById("runnerTimer").textContent = "00:00";
           document.getElementById("runnerSpeed").textContent = "--";
           document.getElementById("runnerPace").textContent = "--";
@@ -2917,10 +2918,6 @@
         const runnerGuidanceElement = document.getElementById("runnerZoneGuidance");
         runnerGuidanceElement.textContent = runnerGuidance ? "Referência pessoal: " + runnerGuidance : "";
         runnerGuidanceElement.classList.toggle("hidden", !runnerGuidance);
-        const runnerShoe = workout.shoeId ? getPlanShoes().find((shoe) => shoe.id === workout.shoeId) : null;
-        const runnerShoeGuidance = document.getElementById("runnerShoeGuidance");
-        runnerShoeGuidance.textContent = runnerShoe ? "Tênis sugerido: " + runnerShoe.name : "";
-        runnerShoeGuidance.classList.toggle("hidden", !runnerShoe);
         document.getElementById("runnerTimer").textContent = formatTimer(Math.max(0, duration - elapsedInSegment));
         document.getElementById("runnerSpeed").textContent = `${Number(segment.speedKmh || 0).toFixed(1)} km/h`;
         document.getElementById("runnerPace").textContent = speedToPace(segment.speedKmh);
